@@ -209,10 +209,19 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     div.logo {
         float:right;
+        height: 200px;
+        width: 20%;
+        margin-top: -120px;
+    }
+
+    div.logo img {
+        height: 200px;
     }
 
     div.naw {
+        float:left;
       margin-top: 120px;
+      width: 40%;
     }
 
     ul {
@@ -354,10 +363,8 @@ table.people tr th {
 
 <div class="container">
 
-    <div class="logo">
-        <img source="/images/logo-regioacademy.png"></img>
-    </div>
 
+<div class="header">
 
     <div class="naw">
         <ul>
@@ -368,7 +375,10 @@ table.people tr th {
             <li>{Adres (Land):18.6}</li>
         </ul>   
     </div>
-
+        <div class="logo">
+    <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
+    </div>
+</div>
 <h1>Factuur</h1>
 
     <div class="general">

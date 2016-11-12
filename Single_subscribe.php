@@ -207,12 +207,21 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
         margin: 0 auto;    
     }
 
-    div.logo {
+  div.logo {
         float:right;
+        height: 200px;
+        width: 20%;
+        margin-top: -120px;
+    }
+
+    div.logo img {
+        height: 200px;
     }
 
     div.naw {
+        float:left;
       margin-top: 120px;
+      width: 40%;
     }
 
     ul {
@@ -249,7 +258,6 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     div.price {
         width: 100%;
-        float: left;
         margin-top: 60px;    
     }
 
@@ -265,6 +273,11 @@ table {
 
 table td {
     vertical-align: top;
+}
+
+div.price-info {
+    width: 100%;
+    display:inline-block;
 }
 
 div.total-price { 
@@ -297,6 +310,7 @@ div.total-price table {
 div.payment-notification {
     text-align: center;
     margin-top: 40px;
+    margin-bottom: 40px;
 }
 
 div.payment-notification p {
@@ -306,7 +320,6 @@ div.payment-notification p {
 
 div.info {
     width: 90%;
-    position:absolute;
     bottom: 0;
 }
 
@@ -346,9 +359,10 @@ table.people ul {
 </style>
 
 <div class="container">
+<div class="header">
 
     <div class="logo">
-        <img source="/images/logo-regioacademy.png"></img>
+        <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
     </div>
 
 
@@ -361,20 +375,20 @@ table.people ul {
             <li>{Adres (Land):18.6}</li>
         </ul>   
     </div>
-
+</div>
 <h1>Factuur</h1>
 
     <div class="general">
         <div class="general-first">
             <ul>
-                <li>
+              <!--  <li>
                     <div class="general-label"><b>Factuurnummer</b></div>
                     <div class="general-value">12345</div>
                 </li>
                 <li>
                     <div class="general-label"><b>Debiteurnummer</b></div>
                     <div class="general-value">453475</div>
-                </li>
+                </li>-->
                 <li>
                     <div class="general-label"><b>Uw referentie</b></div>
                     <div class="general-value">{Specifieke informatie op de factuur:20}</div>
@@ -396,6 +410,8 @@ table.people ul {
     </div>
 
     <div class="price">
+
+
         <table>
             <tr>
                 <th class="description">Omschrijving</th>
@@ -411,6 +427,7 @@ table.people ul {
                 <td>
                         <span><b>Deelnemer:</b></span>
                         <ul>
+
 <?php
                          $repeats = [];
  // Loop through each of the form fields and find any instances of a repeater.
@@ -470,6 +487,8 @@ table.people ul {
         </table>
     </div>
 
+
+<div class="price-info">
     <div class="total-price">
         <table>
             <tr>
@@ -502,7 +521,7 @@ table.people ul {
 
         </table>
     </div>
-
+</div>
     <div class="payment-notification">
       Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer
 NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer.

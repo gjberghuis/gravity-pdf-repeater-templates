@@ -287,7 +287,7 @@ div.total-price {
 
 div.total-price table {
     width: 100%;
-    margin-top: 120px;
+    margin-top: 80px;
 }
 
  table th, table td{
@@ -308,9 +308,8 @@ div.total-price table {
     }
 
 div.payment-notification {
-    text-align: center;
-    margin-top: 40px;
-    margin-bottom: 40px;
+    margin-top: 120px;
+    margin-bottom: 60px;
 }
 
 div.payment-notification p {
@@ -354,6 +353,10 @@ table.people {
 }   
 table.people ul {
     list-style-type:none;
+}
+
+div.participantsInfo ul {
+    padding:0;
 }
 
 </style>
@@ -403,7 +406,7 @@ table.people ul {
                 </li>
                 <li>
                     <div class="general-label"><b>Vervaldatum</b></div>
-                    <div class="general-value"><?php echo date('d-m-Y', strtotime("+30 days")); ?></div>
+                    <div class="general-value"><?php echo date('d-m-Y', strtotime("+14 days")); ?></div>
                 </li>
             </ul>
         </div>
@@ -421,54 +424,7 @@ table.people ul {
                 <th>Totaalbedrag</th>
             </tr>
             <tr>
-                <td>Deelname Het Grootste Kennisfestival
-                <table class="people">
-                <tr>
-                <td>
-                        <span><b>Deelnemer:</b></span>
-                        <ul>
-
-<?php
-                         $repeats = [];
- // Loop through each of the form fields and find any instances of a repeater.
- // This just loops through the fields NOT the actual entries, that's next.
- foreach ($form[fields] as $key=>$formField) {
- if (get_class($formField) == 'GF_Field_Repeater') {
- $repeaterID = $formField[id];
- $repeaterChildren = $formField[repeaterChildren];
- }
- }
-
- // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
- foreach ($entry as $key=>$formEntry) {
- if ($key == $repeaterID) {
- // Breakdown the repeater's inputs. us = un-serialized.
- $usEntry = unserialize($formEntry);
- }
- }
- 
- foreach ($usEntry as $oneEntry) {
- // MATCH UP THE FIELDS AND INPUTS
- foreach ($form[fields] as $key=>$formField) {
- $fieldId = $formField[id];
- if (array_key_exists($fieldId, $oneEntry)) {
- $singleInput = implode(" ",$oneEntry[$fieldId]);
- // Only include inputs that aren't empty
- if (!empty($singleInput)) {
- $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
- }
- }
- }
- array_push($repeats, $singleRepeat);
- unset($singleRepeat);
-
- var_dump($repeats);
- } ?>
-                            <li>Naam: {Naam (Voornaam):15.3} {Naam (Achternaam):15.6}</li>
-                            <li>Email: {E-mailadres:13}</li>
-                            </ul></td>
-</tr>
-                    </table>                
+                <td>Deelname Het Grootste Kennisfestival       
                 </td>
                 <td>1,00</td>
                 <td>€ 195,00</td>
@@ -523,8 +479,8 @@ table.people ul {
     </div>
 </div>
     <div class="payment-notification">
-      Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer
-NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer.
+      Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben naar aanleiding van deze factuur dan kan je een mail sturen naar facturen@regioacademy.nl. Dan nemen we zo snel mogelijk contact met je op.
+ 
 
         </div>
 
@@ -532,15 +488,13 @@ NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuu
            <div class="info-part">
                <ul>
                    <li>Regio Academy</li>
-                   <li>Dasstraat 37</li>
-                   <li>7559 AA Hengelo</li>
+                   <li>Slingerbos 8</li>
+                   <li>7431 BV Diepenveen</li>
                    <li>Nederland</li>
                </ul>
            </div>
            <div class="info-part-middle">
                <ul>
-                   <li>Tel (06)21874369</li>
-                   <li>jaap@regioacademy.nl</li>
                    <li>www.regioacademy.nl</li>
                </ul>
            </div>
@@ -552,6 +506,54 @@ NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuu
                </ul>
            </div>
 
+        </div>
+
+        <div class="perticipantsInfo">
+            <h1>Deelnemer</h1>
+        <div>
+                       
+                        <ul>
+
+<?php
+                         $repeats = [];
+ // Loop through each of the form fields and find any instances of a repeater.
+ // This just loops through the fields NOT the actual entries, that's next.
+ foreach ($form[fields] as $key=>$formField) {
+ if (get_class($formField) == 'GF_Field_Repeater') {
+ $repeaterID = $formField[id];
+ $repeaterChildren = $formField[repeaterChildren];
+ }
+ }
+
+ // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
+ foreach ($entry as $key=>$formEntry) {
+ if ($key == $repeaterID) {
+ // Breakdown the repeater's inputs. us = un-serialized.
+ $usEntry = unserialize($formEntry);
+ }
+ }
+ 
+ foreach ($usEntry as $oneEntry) {
+ // MATCH UP THE FIELDS AND INPUTS
+ foreach ($form[fields] as $key=>$formField) {
+ $fieldId = $formField[id];
+ if (array_key_exists($fieldId, $oneEntry)) {
+ $singleInput = implode(" ",$oneEntry[$fieldId]);
+ // Only include inputs that aren't empty
+ if (!empty($singleInput)) {
+ $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
+ }
+ }
+ }
+ array_push($repeats, $singleRepeat);
+ unset($singleRepeat);
+
+ var_dump($repeats);
+ } ?>
+                            <li>Naam: {Naam (Voornaam):15.3} {Naam (Achternaam):15.6}</li>
+                            <li>Email: {E-mailadres:13}</li>
+                            </ul></div>
+       
         </div>
 </div>
 <!-- Output our HTML markup -->

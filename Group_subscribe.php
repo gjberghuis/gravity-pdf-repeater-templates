@@ -262,124 +262,165 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
         margin-top: 60px;    
     }
 
-body {
-      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-}
-
-table {
-    width: 100%;
-    
-    border-collapse: collapse;
-}
-
-table td {
-    vertical-align: top;
-}
-
-div.total-price { 
-    width: 40%;
-    margin-left:auto; 
-    margin-right:0;
-}
-
-div.total-price table {
-    width: 100%;
-    margin-top: 80px;
-}
-
- table th, table td{
-     border: 1px solid #ddd;
-    padding: 8px;
-}
-
-  table tr th { 
-        text-align:left;
-           background-color: #ede8c4;
-    color: black;
-      padding-top: 12px;
-    padding-bottom: 12px;
+    body {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     }
 
- table tr th.description { 
-        width: 50%;
+    table {
+        width: 100%;
+        
+        border-collapse: collapse;
     }
 
-div.payment-notification {
-    width:100%;
-    text-align: center;
-    margin-top: 40px;
-}
+    table td {
+        vertical-align: top;
+    }
 
-div.payment-notification p {
-    display:block;
-    margin-top: 40px;
-}
+    div.total-price { 
+        width: 40%;
+        margin-left:auto; 
+        margin-right:0;
+    }
 
-div.info {
-    margin-top: 40px;
-    width: 90%;
-    position:absolute;
-    bottom: 0;
-}
+    div.total-price table {
+        width: 100%;
+        margin-top: 80px;
+    }
 
-div.info-part{
-    width: 33%;
-    float: left;
-}
+    table th, table td{
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
 
-div.info-part-middle{
-    width: 33%;
-    float: left;
-}
+    table tr th { 
+            text-align:left;
+            background-color: #ede8c4;
+        color: black;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        }
 
-div.info-part-middle ul{
-display:table;
-margin:auto;
-}
+    table tr th.description { 
+            width: 50%;
+        }
 
-div.info-part-last{
-    width: 33%;
-    float: right;
-}
+  
 
-div.info-part-last ul{
-    float: right;
-}
+    div.payment-notification {
+        margin-top: 100px;
+        margin-bottom: 60px;
+    }
 
-table.people {
-    margin-top:20px;
-    margin-left:20px;
-    padding-top:20px;
-}   
+    div.payment-notification p {
+        display:block;
+        margin-top: 40px;
+    }
 
-table.people tr th {  
-     text-align:left;
-           background-color: white;
-    color: black;
-      padding-top: 12px;
-    padding-bottom: 12px;
+    div.info {
+        margin-top: 40px;
+        width: 90%;
+        position:absolute;
+        bottom: 0;
+    }
+
+    div.info-part{
+        width: 33%;
+        float: left;
+    }
+
+    div.info-part-middle{
+        width: 33%;
+        float: left;
+    }
+
+    div.info-part-middle ul{
+    display:table;
+    margin:auto;
+    }
+
+    div.info-part-last{
+        width: 33%;
+        float: right;
+    }
+
+    div.info-part-last ul{
+        float: right;
+    }
+
+   table.people {
+        margin-top:20px;
+        margin-left:20px;
+        padding-top:20px;
+    }   
+    table.people ul {
+        list-style-type:none;
+    }
+
+    div.participantsInfo ul {
+    padding:0;
 }
 </style>
 
+<?php
+    $repeats = [];
+    $participants =[];
+
+    // Loop through each of the form fields and find any instances of a repeater.
+    // This just loops through the fields NOT the actual entries, that's next.
+    foreach ($form[fields] as $key=>$formField) {
+        if (get_class($formField) == 'GF_Field_Repeater') {
+            $repeaterID = $formField[id];
+            $repeaterChildren = $formField[repeaterChildren];
+        }
+    }
+
+    // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
+    foreach ($entry as $key=>$formEntry) {
+        if ($key == $repeaterID) {
+            // Breakdown the repeater's inputs. us = un-serialized.
+            $usEntry = unserialize($formEntry);
+        }
+    }
+
+    foreach ($usEntry as $keyOneEntry=>$oneEntry) {
+        $participant = array();
+        
+        // MATCH UP THE FIELDS AND INPUTS
+        foreach ($form[fields] as $key=>$formField) {
+            $fieldId = $formField[id];
+            if (array_key_exists($fieldId, $oneEntry)) {
+                $singleInput = implode(" ",$oneEntry[$fieldId]);
+                // Only include inputs that aren't empty
+                    if (!empty($singleInput)) {
+                    $participant[$formField[label]] = $singleInput;
+                    $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
+                }
+            }
+        }
+        $participants[$keyOneEntry] = $participant;
+
+        array_push($repeats, $singleRepeat);
+        unset($singleRepeat);
+} ?>
+
 <div class="container">
+    <div class="header">
 
-
-<div class="header">
-
-    <div class="naw">
-        <ul>
-            <li><b>{Organisatie:16}</b></li>
-            <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
-            <li>{Adres (Straat + huisnummer):18.1}</li>
-            <li>{Adres (Postcode):18.3}</li>
-            <li>{Adres (Land):18.6}</li>
-        </ul>   
-    </div>
+        <div class="naw">
+            <ul>
+                <li><b>{Organisatie:16}</b></li>
+                <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
+                <li>{Adres (Straat + huisnummer):18.1}</li>
+                <li>{Adres (Postcode):18.3}</li>
+                <li>{Adres (Land):18.6}</li>
+            </ul>   
+        </div>
         <div class="logo">
-    <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
+            <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
+        </div>
     </div>
-</div>
-<h1>Factuur</h1>
+
+    <h1>Factuur</h1>
 
     <div class="general">
         <div class="general-first">
@@ -399,7 +440,7 @@ table.people tr th {
             </ul>    
         </div>
         <div class="general-second">
-        <ul>
+            <ul>
                 <li>
                     <div class="general-label"><b>Factuurdatum</b></div>
                     <div class="general-value"><?php echo date("d-m-Y"); ?></div>
@@ -423,100 +464,35 @@ table.people tr th {
             </tr>
             <tr>
                 <td>Deelname Het Grootste Kennisfestival
-             
-    <div><br/>Deelnemers:</div>
-
-              <table class="people">
-              
-                <tr>
-                <th>Naam</th>
-                <th>Emailadres</th>
-                </tr>           
-<?php
- $repeats = [];
- $participants =[];
-
- // Loop through each of the form fields and find any instances of a repeater.
- // This just loops through the fields NOT the actual entries, that's next.
- foreach ($form[fields] as $key=>$formField) {
- if (get_class($formField) == 'GF_Field_Repeater') {
- $repeaterID = $formField[id];
- $repeaterChildren = $formField[repeaterChildren];
- }
- }
-
- // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
- foreach ($entry as $key=>$formEntry) {
- if ($key == $repeaterID) {
- // Breakdown the repeater's inputs. us = un-serialized.
- $usEntry = unserialize($formEntry);
- }
- }
- 
- foreach ($usEntry as $keyOneEntry=>$oneEntry) {
-     $participant = array();
- // MATCH UP THE FIELDS AND INPUTS
-    foreach ($form[fields] as $key=>$formField) {
-        $fieldId = $formField[id];
-
-        if (array_key_exists($fieldId, $oneEntry)) {
-            $singleInput = implode(" ",$oneEntry[$fieldId]);
-            // Only include inputs that aren't empty
-                if (!empty($singleInput)) {
-                $participant[$formField[label]] = $singleInput;
-                $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
-            }
-        }
-    }
-
-    $participants[$keyOneEntry] = $participant;
-  
-    array_push($repeats, $singleRepeat);
-    unset($singleRepeat);
-
- } 
-
- foreach ($participants as $key => $value) {
-     ?>
- 
-              
-<tr>
-
-                            <td><?php echo($value['Naam']) ?></td>
-                            <td><?php echo $value['E-mailadres']; ?></td>
-                            </tr>
-                         
-     <?php
- }
- 
- ?>
-
-                    </table>                
                 </td>
 
-                <?php 
+                <?php
                     $participantsPrice = (count($participants)*195); 
                     $parkingTicket = 10;
+                    $numberParkingTickets = 1;
+                    if (!empty($entry[27])) {
+                        $numberParkingTickets = $entry[27];
+                    }
+                    $parkingCosts = $numberParkingTickets * $parkingTicket;
                     $btw = $participantsPrice * 0.21;
-                    $btwWithPartkingTicket = ($parkingTicket + $participantsPrice) * 0.21;
-                    $totalPrice = $parkingTicket + $participantsPrice;
-                    $totalPriceBtw = ($parkingTicket + $participantsPrice) * 1.21;
+                    $btwWithPartkingTicket = ($parkingCosts + $participantsPrice) * 0.21;
+                    $totalPrice = $parkingCosts + $participantsPrice;
+                    $totalPriceBtw = ($parkingCosts + $participantsPrice) * 1.21;
                     $totalPriceWithoutParkingTicket = $participantsPrice * 1.21;
-                    
                 ?>
 
-                <td><?php echo count($participants) ?>,00</td>
+                <td><?php echo number_format(count($participants), 2, ',', ''); ?></td>
                 <td>€ 195,00</td>
                 <td>21 %</td>
-                <td>€ <?php echo $participantsPrice ?>,00</td>
+                <td>€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
             </tr>
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
                 <td>Parkeerticket</td>
-                <td>1,00</td>
+                <td><?php echo number_format($numberParkingTickets, 2, ',', ''); ?></td>
                 <td>€ 10,00</td>
                 <td>21 %</td>
-                <td>€ 10,00</td>
+                <td>€ <?php echo number_format($parkingCosts, 2, ',', ''); ?></td>
             </tr>
             [/gravityforms]
         </table>
@@ -556,78 +532,55 @@ table.people tr th {
     </div>
 
     <div class="payment-notification">
-      Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer
-NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer.
+      Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben naar aanleiding van deze factuur dan kan je een mail sturen naar facturen@regioacademy.nl. Dan nemen we zo snel mogelijk contact met je op.
+    </div>
 
+   <div class="info">
+        <div class="info-part">
+            <ul>
+                <li>Regio Academy</li>
+                <li>Slingerbos 8</li>
+                <li>7431 BV Diepenveen</li>
+                <li>Nederland</li>
+            </ul>
         </div>
-
-        <div class="info">
-           <div class="info-part">
-               <ul>
-                   <li>Regio Academy</li>
-                   <li>Dasstraat 37</li>
-                   <li>7559 AA Hengelo</li>
-                   <li>Nederland</li>
-               </ul>
-           </div>
-           <div class="info-part-middle">
-               <ul>
-                   <li>Tel (06)21874369</li>
-                   <li>jaap@regioacademy.nl</li>
-                   <li>www.regioacademy.nl</li>
-               </ul>
-           </div>
-           <div class="info-part-last">
-               <ul>
-                   <li>IBAN NL93RABO0300479743</li>
-                   <li>BTW nr. NL852266248B01</li>
-                   <li>KvK nr. 56692897</li>
-               </ul>
-           </div>
-
+        <div class="info-part-middle">
+            <ul>
+                <li>www.regioacademy.nl</li>
+            </ul>
         </div>
-</div>
-<!-- Output our HTML markup -->
-<?php
+        <div class="info-part-last">
+            <ul>
+                <li>IBAN NL93RABO0300479743</li>
+                <li>BTW nr. NL852266248B01</li>
+                <li>KvK nr. 56692897</li>
+            </ul>
+        </div>
+    </div>
 
-
-
-
-/*
- * Load our core-specific styles from our PDF settings which will be passed to the PDF template $config array
- */
-$show_form_title      = ( ! empty( $settings['show_form_title'] ) && $settings['show_form_title'] == 'Yes' )            ? true : false;
-$show_page_names      = ( ! empty( $settings['show_page_names'] ) && $settings['show_page_names'] == 'Yes' )            ? true : false;
-$show_html            = ( ! empty( $settings['show_html'] ) && $settings['show_html'] == 'Yes' )                        ? true : false;
-$show_section_content = ( ! empty( $settings['show_section_content'] ) && $settings['show_section_content'] == 'Yes' )  ? true : false;
-$enable_conditional   = ( ! empty( $settings['enable_conditional'] ) && $settings['enable_conditional'] == 'Yes' )      ? true : false;
-$show_empty           = ( ! empty( $settings['show_empty'] ) && $settings['show_empty'] == 'Yes' )                      ? true : false;
-
-/**
- * Set up our configuration array to control what is and is not shown in the generated PDF
- *
- * @var array
- */
-$html_config = array(
-    'settings' => $settings,
-    'meta'     => array(
-        'echo'                     => true, /* whether to output the HTML or return it */
-        'exclude'                  => true, /* whether we should exclude fields with a CSS value of 'exclude'. Default to true */
-        'empty'                    => $show_empty, /* whether to show empty fields or not. Default is false */
-        'conditional'              => $enable_conditional, /* whether we should skip fields hidden with conditional logic. Default to true. */
-        'show_title'               => $show_form_title, /* whether we should show the form title. Default to true */
-        'section_content'          => $show_section_content, /* whether we should include a section breaks content. Default to false */
-        'page_names'               => $show_page_names, /* whether we should show the form's page names. Default to false */
-        'html_field'               => $show_html, /* whether we should show the form's html fields. Default to false */
-        'individual_products'      => false, /* Whether to show individual fields in the entry. Default to false - they are grouped together at the end of the form */
-        'enable_css_ready_classes' => true, /* Whether to enable or disable Gravity Forms CSS Ready Class support in your PDF */
-    ),
-);
-
-/*
- * Generate our HTML markup
- *
- * You can access Gravity PDFs common functions and classes through our API wrapper class "GPDFAPI"
- */
-//$pdf = GPDFAPI::get_pdf_class();
-//$pdf->process_html_structure( $entry, GPDFAPI::get_pdf_class( 'model' ), $html_config );
+    <div class="participantsInfo">
+        <h1>Deelnemers</h1>
+        <div>   
+           <table class="people">
+                    
+                        <tr>
+                            <th>Naam</th>
+                            <th>Emailadres</th>
+                        </tr>    
+                     
+                        <?php
+                            foreach ($participants as $key => $value) {
+                        ?>
+    
+                        <tr>
+                            <td><?php echo($value['Naam']) ?></td>
+                            <td><?php echo $value['E-mailadres']; ?></td>
+                        </tr>
+                         
+                        <?php 
+                            } 
+                        ?>
+                    </table>        
+        </div>
+    </div>
+</div>            

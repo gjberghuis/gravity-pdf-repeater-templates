@@ -308,7 +308,7 @@ div.total-price table {
     }
 
 div.payment-notification {
-    margin-top: 120px;
+    margin-top: 100px;
     margin-bottom: 60px;
 }
 
@@ -362,29 +362,29 @@ div.participantsInfo ul {
 </style>
 
 <div class="container">
-<div class="header">
+    <div class="header">
 
-    <div class="logo">
-        <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
+        <div class="logo">
+            <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
+        </div>
+
+        <div class="naw">
+            <ul>
+                <li><b>{Organisatie:16}</b></li>
+                <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
+                <li>{Adres (Straat + huisnummer):18.1}</li>
+                <li>{Adres (Postcode):18.3}</li>
+                <li>{Adres (Land):18.6}</li>
+            </ul>   
+        </div>
     </div>
 
-
-    <div class="naw">
-        <ul>
-            <li><b>{Organisatie:16}</b></li>
-            <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
-            <li>{Adres (Straat + huisnummer):18.1}</li>
-            <li>{Adres (Postcode):18.3}</li>
-            <li>{Adres (Land):18.6}</li>
-        </ul>   
-    </div>
-</div>
-<h1>Factuur</h1>
+    <h1>Factuur</h1>
 
     <div class="general">
         <div class="general-first">
             <ul>
-              <!--  <li>
+            <!--  <li>
                     <div class="general-label"><b>Factuurnummer</b></div>
                     <div class="general-value">12345</div>
                 </li>
@@ -399,7 +399,7 @@ div.participantsInfo ul {
             </ul>    
         </div>
         <div class="general-second">
-        <ul>
+            <ul>
                 <li>
                     <div class="general-label"><b>Factuurdatum</b></div>
                     <div class="general-value"><?php echo date("d-m-Y"); ?></div>
@@ -413,8 +413,6 @@ div.participantsInfo ul {
     </div>
 
     <div class="price">
-
-
         <table>
             <tr>
                 <th class="description">Omschrijving</th>
@@ -443,160 +441,113 @@ div.participantsInfo ul {
         </table>
     </div>
 
+    <div class="price-info">
+        <div class="total-price">
+            <table>
+                <tr>
+                    <td>Totaal exclusief BTW</td>
+                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
+                        <td>€ 205,00</td>
+                        [/gravityforms]
+                        [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
+                    <td>€ 195,00</td>
+                    [/gravityforms]
+                </tr>
+                <tr>
+                    <td>BTW 21%</td>
+                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
+                        <td>€ 43,05</td>
+                        [/gravityforms]
+                        [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
+                    <td>€ 40,95</td>
+                    [/gravityforms]
+                </tr>
+                <tr>
+                    <th>Totaal te voldoen</th>
+                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
+                        <th>€ 245,95</th>
+                        [/gravityforms]
+                        [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
+                    <th>€ 235,95</th>
+                    [/gravityforms]
+                </tr>
 
-<div class="price-info">
-    <div class="total-price">
-        <table>
-            <tr>
-                <td>Totaal exclusief BTW</td>
-                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <td>€ 205,00</td>
-                    [/gravityforms]
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <td>€ 195,00</td>
-                [/gravityforms]
-            </tr>
-            <tr>
-                <td>BTW 21%</td>
-                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <td>€ 43,05</td>
-                    [/gravityforms]
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <td>€ 40,95</td>
-                [/gravityforms]
-            </tr>
-            <tr>
-                <th>Totaal te voldoen</th>
-                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <th>€ 245,95</th>
-                    [/gravityforms]
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <th>€ 235,95</th>
-                [/gravityforms]
-            </tr>
-
-        </table>
+            </table>
+        </div>
     </div>
-</div>
+
     <div class="payment-notification">
       Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben naar aanleiding van deze factuur dan kan je een mail sturen naar facturen@regioacademy.nl. Dan nemen we zo snel mogelijk contact met je op.
- 
+    </div>
 
+    <div class="info">
+        <div class="info-part">
+            <ul>
+                <li>Regio Academy</li>
+                <li>Slingerbos 8</li>
+                <li>7431 BV Diepenveen</li>
+                <li>Nederland</li>
+            </ul>
         </div>
-
-        <div class="info">
-           <div class="info-part">
-               <ul>
-                   <li>Regio Academy</li>
-                   <li>Slingerbos 8</li>
-                   <li>7431 BV Diepenveen</li>
-                   <li>Nederland</li>
-               </ul>
-           </div>
-           <div class="info-part-middle">
-               <ul>
-                   <li>www.regioacademy.nl</li>
-               </ul>
-           </div>
-           <div class="info-part-last">
-               <ul>
-                   <li>IBAN NL93RABO0300479743</li>
-                   <li>BTW nr. NL852266248B01</li>
-                   <li>KvK nr. 56692897</li>
-               </ul>
-           </div>
-
+        <div class="info-part-middle">
+            <ul>
+                <li>www.regioacademy.nl</li>
+            </ul>
         </div>
-
-        <div class="perticipantsInfo">
-            <h1>Deelnemer</h1>
-        <div>
-                       
-                        <ul>
-
-<?php
-                         $repeats = [];
- // Loop through each of the form fields and find any instances of a repeater.
- // This just loops through the fields NOT the actual entries, that's next.
- foreach ($form[fields] as $key=>$formField) {
- if (get_class($formField) == 'GF_Field_Repeater') {
- $repeaterID = $formField[id];
- $repeaterChildren = $formField[repeaterChildren];
- }
- }
-
- // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
- foreach ($entry as $key=>$formEntry) {
- if ($key == $repeaterID) {
- // Breakdown the repeater's inputs. us = un-serialized.
- $usEntry = unserialize($formEntry);
- }
- }
- 
- foreach ($usEntry as $oneEntry) {
- // MATCH UP THE FIELDS AND INPUTS
- foreach ($form[fields] as $key=>$formField) {
- $fieldId = $formField[id];
- if (array_key_exists($fieldId, $oneEntry)) {
- $singleInput = implode(" ",$oneEntry[$fieldId]);
- // Only include inputs that aren't empty
- if (!empty($singleInput)) {
- $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
- }
- }
- }
- array_push($repeats, $singleRepeat);
- unset($singleRepeat);
-
- var_dump($repeats);
- } ?>
-                            <li>Naam: {Naam (Voornaam):15.3} {Naam (Achternaam):15.6}</li>
-                            <li>Email: {E-mailadres:13}</li>
-                            </ul></div>
-       
+        <div class="info-part-last">
+            <ul>
+                <li>IBAN NL93RABO0300479743</li>
+                <li>BTW nr. NL852266248B01</li>
+                <li>KvK nr. 56692897</li>
+            </ul>
         </div>
+    </div>
+
+    <div class="participantsInfo">
+        <h1>Deelnemer</h1>
+        <div>   
+            <ul>
+
+                <?php
+                    $repeats = [];
+                    // Loop through each of the form fields and find any instances of a repeater.
+                    // This just loops through the fields NOT the actual entries, that's next.
+                    foreach ($form[fields] as $key=>$formField) {
+                        if (get_class($formField) == 'GF_Field_Repeater') {
+                            $repeaterID = $formField[id];
+                            $repeaterChildren = $formField[repeaterChildren];
+                        }
+                    }
+
+                    // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
+                    foreach ($entry as $key=>$formEntry) {
+                        if ($key == $repeaterID) {
+                            // Breakdown the repeater's inputs. us = un-serialized.
+                            $usEntry = unserialize($formEntry);
+                        }
+                    }
+                    
+                    foreach ($usEntry as $oneEntry) {
+                        // MATCH UP THE FIELDS AND INPUTS
+                        foreach ($form[fields] as $key=>$formField) {
+                            $fieldId = $formField[id];
+                            
+                            if (array_key_exists($fieldId, $oneEntry)) {
+                                $singleInput = implode(" ",$oneEntry[$fieldId]);
+                                // Only include inputs that aren't empty
+                                if (!empty($singleInput)) {
+                                    $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
+                                }
+                            }
+                        }
+                        array_push($repeats, $singleRepeat);
+                        unset($singleRepeat);
+                    } 
+                ?>
+
+                <li>Naam: {Naam (Voornaam):15.3} {Naam (Achternaam):15.6}</li>
+                <li>Email: {E-mailadres:13}</li>
+            </ul>
+        </div>
+    </div>
 </div>
-<!-- Output our HTML markup -->
-<?php
-
-
-
-
-/*
- * Load our core-specific styles from our PDF settings which will be passed to the PDF template $config array
- */
-$show_form_title      = ( ! empty( $settings['show_form_title'] ) && $settings['show_form_title'] == 'Yes' )            ? true : false;
-$show_page_names      = ( ! empty( $settings['show_page_names'] ) && $settings['show_page_names'] == 'Yes' )            ? true : false;
-$show_html            = ( ! empty( $settings['show_html'] ) && $settings['show_html'] == 'Yes' )                        ? true : false;
-$show_section_content = ( ! empty( $settings['show_section_content'] ) && $settings['show_section_content'] == 'Yes' )  ? true : false;
-$enable_conditional   = ( ! empty( $settings['enable_conditional'] ) && $settings['enable_conditional'] == 'Yes' )      ? true : false;
-$show_empty           = ( ! empty( $settings['show_empty'] ) && $settings['show_empty'] == 'Yes' )                      ? true : false;
-
-/**
- * Set up our configuration array to control what is and is not shown in the generated PDF
- *
- * @var array
- */
-$html_config = array(
-    'settings' => $settings,
-    'meta'     => array(
-        'echo'                     => true, /* whether to output the HTML or return it */
-        'exclude'                  => true, /* whether we should exclude fields with a CSS value of 'exclude'. Default to true */
-        'empty'                    => $show_empty, /* whether to show empty fields or not. Default is false */
-        'conditional'              => $enable_conditional, /* whether we should skip fields hidden with conditional logic. Default to true. */
-        'show_title'               => $show_form_title, /* whether we should show the form title. Default to true */
-        'section_content'          => $show_section_content, /* whether we should include a section breaks content. Default to false */
-        'page_names'               => $show_page_names, /* whether we should show the form's page names. Default to false */
-        'html_field'               => $show_html, /* whether we should show the form's html fields. Default to false */
-        'individual_products'      => false, /* Whether to show individual fields in the entry. Default to false - they are grouped together at the end of the form */
-        'enable_css_ready_classes' => true, /* Whether to enable or disable Gravity Forms CSS Ready Class support in your PDF */
-    ),
-);
-
-/*
- * Generate our HTML markup
- *
- * You can access Gravity PDFs common functions and classes through our API wrapper class "GPDFAPI"
- */
-//$pdf = GPDFAPI::get_pdf_class();
-//$pdf->process_html_structure( $entry, GPDFAPI::get_pdf_class( 'model' ), $html_config );

@@ -381,6 +381,40 @@ div.participantsInfo ul {
 
     <h1>Factuur</h1>
 
+   <?php
+        $kortingsCode = null;
+         if (!empty($entry[21])) {
+            $kortingsCode = trim($entry[21]);
+        }
+
+        $ticketPrice = 195;
+        $parkingTicket = 10;
+        $totalPriceTicket = 205;
+        if (!empty($kortingsCode)) {
+            if ($kortingsCode == 'Studenten2017@grootstekennis') {
+                $totalPriceTicket = 45;
+            } elseif ($kortingsCode == 'Partner2017@grootstekennis') {
+                $totalPriceTicket = 175;
+            } elseif ($kortingsCode == 'Samr2017@grootstekennis') {
+                $totalPriceTicket = 175;
+            } elseif ($kortingsCode == 'Performer2017@grootstekennis') {
+                $totalPriceTicket = 0;
+            } elseif ($kortingsCode == 'hulp2017@grootstekennis') {
+                $totalPriceTicket = 0;
+            } 
+        } 
+
+        $parkingTicket = 10;
+        $totalPrice = $totalPriceTicket;
+        if (!empty($entry[22]) && $entry[22] == 'Ja') {
+            $totalPrice += $parkingTicket;
+        }
+        
+        $btw = $totalPrice * 0.21;
+        $totalPriceBtw = $totalPrice * 1.21;
+    ?>
+
+
     <div class="general">
         <div class="general-first">
             <ul>
@@ -425,17 +459,17 @@ div.participantsInfo ul {
                 <td>Deelname Het Grootste Kennisfestival       
                 </td>
                 <td>1,00</td>
-                <td>€ 195,00</td>
+                <td>€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
                 <td>21 %</td>
-                <td>€ 195,00</td>
+                <td>€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
             </tr>
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
                 <td>Parkeerticket</td>
                 <td>1,00</td>
-                <td>€ 10,00</td>
+                <td>€ <?php echo number_format($parkingTicket, 2, ',', ''); ?></td>
                 <td>21 %</td>
-                <td>€ 10,00</td>
+                <td>€ <?php echo number_format($parkingTicket, 2, ',', ''); ?></td>
             </tr>
             [/gravityforms]
         </table>
@@ -446,32 +480,16 @@ div.participantsInfo ul {
             <table>
                 <tr>
                     <td>Totaal exclusief BTW</td>
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                        <td>€ 205,00</td>
-                        [/gravityforms]
-                        [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                    <td>€ 195,00</td>
-                    [/gravityforms]
+                    <td>€ <?php echo number_format($totalPrice, 2, ',', ''); ?></td>
                 </tr>
                 <tr>
                     <td>BTW 21%</td>
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                        <td>€ 43,05</td>
-                        [/gravityforms]
-                        [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                    <td>€ 40,95</td>
-                    [/gravityforms]
+                    <td>€ <?php echo number_format($btw, 2, ',', ''); ?></td>
                 </tr>
                 <tr>
                     <th>Totaal te voldoen</th>
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                        <th>€ 245,95</th>
-                        [/gravityforms]
-                        [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                    <th>€ 235,95</th>
-                    [/gravityforms]
+                    <th>€ <?php echo number_format($totalPriceBtw, 2, ',', ''); ?></th>
                 </tr>
-
             </table>
         </div>
     </div>

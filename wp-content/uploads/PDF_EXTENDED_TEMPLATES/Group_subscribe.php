@@ -365,6 +365,16 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     $repeats = [];
     $participants =[];
 
+
+    $mainParticipant = [];
+    if (!empty($form_data['field'][15]["first"]) && !empty($form_data['field'][15]["last"])) {
+        $mainParticipant['Naam'] = $form_data['field'][15]["first"] . " " . $form_data['field'][15]["last"];
+    } 
+    if (!empty($entry[13])) {
+        $mainParticipant['E-mailadres'] = $entry[13];
+    } 
+    $participants[] = $mainParticipant;
+
     // Loop through each of the form fields and find any instances of a repeater.
     // This just loops through the fields NOT the actual entries, that's next.
     foreach ($form[fields] as $key=>$formField) {
@@ -397,11 +407,13 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
                 }
             }
         }
-        $participants[$keyOneEntry] = $participant;
+        $participants[] = $participant;
 
         array_push($repeats, $singleRepeat);
         unset($singleRepeat);
-} ?>
+    }
+
+?>
 
 <div class="container">
     <div class="header">
@@ -481,18 +493,18 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
                     $totalPriceWithoutParkingTicket = $participantsPrice * 1.21;
                 ?>
 
-                <td><?php echo number_format(count($participants), 2, ',', ''); ?></td>
-                <td>€ 195,00</td>
-                <td>21 %</td>
-                <td>€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
+                <td align="right"><?php echo number_format(count($participants), 2, ',', ''); ?></td>
+                <td align="right">€ 195,00</td>
+                <td align="right">21 %</td>
+                <td align="right">€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
             </tr>
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
                 <td>Parkeerticket</td>
-                <td><?php echo number_format($numberParkingTickets, 2, ',', ''); ?></td>
-                <td>€ 10,00</td>
-                <td>21 %</td>
-                <td>€ <?php echo number_format($parkingCosts, 2, ',', ''); ?></td>
+                <td align="right"><?php echo number_format($numberParkingTickets, 2, ',', ''); ?></td>
+                <td align="right">€ 10,00</td>
+                <td align="right">21 %</td>
+                <td align="right">€ <?php echo number_format($parkingCosts, 2, ',', ''); ?></td>
             </tr>
             [/gravityforms]
         </table>
@@ -503,28 +515,28 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
             <tr>
                 <td>Totaal exclusief BTW</td>
                   [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <td>€ <?php echo number_format($totalPrice, 2, ',', ''); ?></td>
+                    <td align="right">€ <?php echo number_format($totalPrice, 2, ',', ''); ?></td>
                     [/gravityforms]
                     [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <td>€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
                 [/gravityforms]
             </tr>
             <tr>
                 <td>BTW 21%</td>
                   [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <td>€ <?php echo number_format($btwWithPartkingTicket, 2, ',', ''); ?></td>
+                    <td align="right">€ <?php echo number_format($btwWithPartkingTicket, 2, ',', ''); ?></td>
                     [/gravityforms]
                     [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <td>€ <?php echo number_format($btw, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($btw, 2, ',', ''); ?></td>
                 [/gravityforms]
             </tr>
             <tr>
                 <th>Totaal te voldoen</th>
                   [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <th>€ <?php echo number_format($totalPriceBtw, 2, ',', ''); ?></th>
+                    <th align="right">€ <?php echo number_format($totalPriceBtw, 2, ',', ''); ?></th>
                     [/gravityforms]
                     [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <th>€ <?php echo number_format($totalPriceWithoutParkingTicket, 2, ',', ''); ?></th>
+                <th align="right">€ <?php echo number_format($totalPriceWithoutParkingTicket, 2, ',', ''); ?></th>
                 [/gravityforms]
             </tr>
 

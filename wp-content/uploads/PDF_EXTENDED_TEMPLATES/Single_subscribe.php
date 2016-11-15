@@ -373,7 +373,7 @@ div.participantsInfo ul {
                 <li><b>{Organisatie:16}</b></li>
                 <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
                 <li>{Adres (Straat + huisnummer):18.1}</li>
-                <li>{Adres (Postcode):18.3}</li>
+                <li>{Adres (Postcode):18.3} {Adres (Plaats):18.5}</li>
                 <li>{Adres (Land):18.6}</li>
             </ul>   
         </div>
@@ -387,9 +387,8 @@ div.participantsInfo ul {
             $kortingsCode = trim($entry[21]);
         }
 
-        $ticketPrice = 195;
         $parkingTicket = 10;
-        $totalPriceTicket = 205;
+        $totalPriceTicket = 195;
         if (!empty($kortingsCode)) {
             if ($kortingsCode == 'Studenten2017@grootstekennis') {
                 $totalPriceTicket = 45;
@@ -458,18 +457,18 @@ div.participantsInfo ul {
             <tr>
                 <td>Deelname Het Grootste Kennisfestival       
                 </td>
-                <td>1,00</td>
-                <td>€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
-                <td>21 %</td>
-                <td>€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
+                <td align="right">1,00</td>
+                <td align="right">€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
+                <td align="right">21 %</td>
+                <td align="right">€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
             </tr>
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
                 <td>Parkeerticket</td>
-                <td>1,00</td>
-                <td>€ <?php echo number_format($parkingTicket, 2, ',', ''); ?></td>
-                <td>21 %</td>
-                <td>€ <?php echo number_format($parkingTicket, 2, ',', ''); ?></td>
+                <td align="right">1,00</td>
+                <td align="right">€ <?php echo number_format($parkingTicket, 2, ',', ''); ?></td>
+                <td align="right">21 %</td>
+                <td align="right">€ <?php echo number_format($parkingTicket, 2, ',', ''); ?></td>
             </tr>
             [/gravityforms]
         </table>
@@ -480,15 +479,15 @@ div.participantsInfo ul {
             <table>
                 <tr>
                     <td>Totaal exclusief BTW</td>
-                    <td>€ <?php echo number_format($totalPrice, 2, ',', ''); ?></td>
+                    <td align="right">€ <?php echo number_format($totalPrice, 2, ',', ''); ?></td>
                 </tr>
                 <tr>
                     <td>BTW 21%</td>
-                    <td>€ <?php echo number_format($btw, 2, ',', ''); ?></td>
+                    <td align="right">€ <?php echo number_format($btw, 2, ',', ''); ?></td>
                 </tr>
                 <tr>
                     <th>Totaal te voldoen</th>
-                    <th>€ <?php echo number_format($totalPriceBtw, 2, ',', ''); ?></th>
+                    <th align="right">€ <?php echo number_format($totalPriceBtw, 2, ',', ''); ?></th>
                 </tr>
             </table>
         </div>

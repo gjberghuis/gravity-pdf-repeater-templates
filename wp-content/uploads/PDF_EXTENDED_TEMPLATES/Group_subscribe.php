@@ -423,7 +423,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
                 <li><b>{Organisatie:16}</b></li>
                 <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
                 <li>{Adres (Straat + huisnummer):18.1}</li>
-                <li>{Adres (Postcode):18.3}</li>
+                <li>{Adres (Postcode):18.3} {Adres (Plaats):18.5}</li>
                 <li>{Adres (Land):18.6}</li>
             </ul>   
         </div>

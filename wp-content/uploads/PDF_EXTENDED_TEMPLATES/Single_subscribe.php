@@ -422,13 +422,13 @@ div.participantsInfo ul {
 
         global $wpdb;
         $exists = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions WHERE submission_id = '$submission_id'");
-
+        
         if ($exists < 1) {
             $wpdb->insert('word1_submissions',
                 array(
                     'submission_id'=>$submission_id,
                     'invoice_number'=>$invoiceNumber,
-                    'submission_type'=>'individueel',
+                    'submission_type'=>'groep',
                     'submission_date'=>$submission_dateDb,
                     'expiration_date'=>$expiration_dateDb,
                     'organization'=>$organization,
@@ -452,8 +452,7 @@ div.participantsInfo ul {
             $wpdb->insert('word1_submission_participants',
                 array(
                     'invoice_id'=>$submissionId,
-                    'first_name'=>$participant_firstname,
-                    'last_name'=>$participant_lastname,
+                    'name'=>$participant_firstname . ' ' . $participant_lastname,
                     'email'=>$participant_email
                 )
             );

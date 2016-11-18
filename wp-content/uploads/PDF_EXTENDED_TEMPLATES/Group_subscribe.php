@@ -413,6 +413,85 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
         unset($singleRepeat);
     }
 
+    $participantsPrice = (count($participants)*175); 
+    $parkingTicket = 10;
+    $numberParkingTickets = 1;
+    if (!empty($entry[27])) {
+        $numberParkingTickets = $entry[27];
+    }
+    $parkingCosts = $numberParkingTickets * $parkingTicket;
+    $btw = $participantsPrice * 0.21;
+    $btwWithPartkingTicket = ($parkingCosts + $participantsPrice) * 0.21;
+    $totalPrice = $parkingCosts + $participantsPrice;
+    $totalPriceBtw = ($parkingCosts + $participantsPrice) * 1.21;
+    $totalPriceWithoutParkingTicket = $participantsPrice * 1.21;
+
+    // Create invoice number
+        global $wpdb;
+        $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
+
+        $invoiceCount = $count + 1;
+        $invoiceNumber = 'HGKF2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT);   
+
+        $submission_id = $entry['id'];
+        $submission_date = date("d-m-Y");
+        $submission_dateDb = date("Y-m-d H:i:s");
+        $expiration_date = date('d-m-Y', strtotime("+14 days"));
+        $expiration_dateDb = date('Y-m-d H:i:s', strtotime("+14 days"));
+
+        $organization = $entry['16'];
+        $invoice_firstname = $entry['17.3'];
+        $invoice_lastname = $entry['17.6'];
+        $invoice_adress = $entry['18.1'];
+        $invoice_zipcode = $entry['18.3'];
+        $invoice_city = $entry['18.5'];
+        $invoice_email = $entry['19'];
+        $invoice_extra_information = $entry['20'];
+        $notes = $entry['23'];
+        $participant_firstname = $entry['15.3'];
+        $participant_lastname = $entry['15.6'];
+        $participant_email = $entry['13'];
+
+        global $wpdb;
+        $exists = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions WHERE submission_id = '$submission_id'");
+        
+        if ($exists < 1) {
+            $wpdb->insert('word1_submissions',
+                array(
+                    'submission_id'=>$submission_id,
+                    'invoice_number'=>$invoiceNumber,
+                    'submission_type'=>'groep',
+                    'submission_date'=>$submission_dateDb,
+                    'expiration_date'=>$expiration_dateDb,
+                    'organization'=>$organization,
+                    'invoice_firstname'=>$invoice_firstname,
+                    'invoice_lastname'=>$invoice_lastname,
+                    'invoice_adress'=>$invoice_adress,
+                    'invoice_zipcode'=>$invoice_zipcode,
+                    'invoice_city'=>$invoice_city,
+                    'price'=>$totalPrice,
+                    'tax'=>$btw,
+                    'price_tax'=>$totalPriceBtw,
+                    'invoice_email'=>$invoice_email,
+                    'invoice_extra_information'=>$invoice_extra_information,
+                    'parking_tickets'=>$numberParkingTickets,
+                    //'reduction_code'=>$kortingsCode,
+                    'notes'=>$notes
+                )
+            );
+            
+            $submissionId = $wpdb->get_var("SELECT id FROM word1_submissions WHERE submission_id = '$submission_id'");
+
+            foreach ($participants as $particpant) {
+                $wpdb->insert('word1_submission_participants',
+                    array(
+                        'invoice_id'=>$submissionId,
+                        'name'=>$particpant['Naam'],
+                        'email'=>$participant['E-mailadres'] 
+                    )
+                );
+            }
+        }
 ?>
 
 <div class="container">
@@ -437,14 +516,9 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     <div class="general">
         <div class="general-first">
             <ul>
-                 <?php
-                     $entryId = ($entry['id']); 
-                     $countEntries = GFAPI::count_entries(2);
-                     $invoiceNumber = str_pad($countEntries, 4, "0", STR_PAD_LEFT);   
-                 ?>
                <li>
                     <div class="general-label"><b>Factuurnummer</b></div>
-                    <div class="general-value"><? echo "HGKF2017" . $invoiceNumber ?></div>
+                    <div class="general-value"><?php echo $invoiceNumber; ?></div>
                 </li>
                 <!--
                 <li>
@@ -483,22 +557,6 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
             <tr>
                 <td>Deelname Het Grootste Kennisfestival
                 </td>
-
-                <?php
-                    $participantsPrice = (count($participants)*175); 
-                    $parkingTicket = 10;
-                    $numberParkingTickets = 1;
-                    if (!empty($entry[27])) {
-                        $numberParkingTickets = $entry[27];
-                    }
-                    $parkingCosts = $numberParkingTickets * $parkingTicket;
-                    $btw = $participantsPrice * 0.21;
-                    $btwWithPartkingTicket = ($parkingCosts + $participantsPrice) * 0.21;
-                    $totalPrice = $parkingCosts + $participantsPrice;
-                    $totalPriceBtw = ($parkingCosts + $participantsPrice) * 1.21;
-                    $totalPriceWithoutParkingTicket = $participantsPrice * 1.21;
-                ?>
-
                 <td align="right"><?php echo number_format(count($participants), 2, ',', ''); ?></td>
                 <td align="right">€ 175,00</td>
                 <td align="right">21 %</td>
@@ -580,25 +638,24 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
         <h1>Deelnemers</h1>
         <div>   
            <table class="people">
+                <tr>
+                    <th>Naam</th>
+                    <th>Emailadres</th>
+                </tr>    
+                
+                <?php
+                    foreach ($participants as $key => $value) {
+                ?>
+
+                <tr>
+                    <td><?php echo($value['Naam']) ?></td>
+                    <td><?php echo $value['E-mailadres']; ?></td>
+                </tr>
                     
-                        <tr>
-                            <th>Naam</th>
-                            <th>Emailadres</th>
-                        </tr>    
-                     
-                        <?php
-                            foreach ($participants as $key => $value) {
-                        ?>
-    
-                        <tr>
-                            <td><?php echo($value['Naam']) ?></td>
-                            <td><?php echo $value['E-mailadres']; ?></td>
-                        </tr>
-                         
-                        <?php 
-                            } 
-                        ?>
-                    </table>        
+                <?php 
+                    } 
+                ?>
+            </table>        
         </div>
     </div>
 </div>            

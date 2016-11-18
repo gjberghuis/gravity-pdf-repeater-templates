@@ -361,28 +361,8 @@ div.participantsInfo ul {
 
 </style>
 
-<div class="container">
-    <div class="header">
-
-        <div class="logo">
-            <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
-        </div>
-
-        <div class="naw">
-            <ul>
-                <li><b>{Organisatie:16}</b></li>
-                <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
-                <li>{Adres (Straat + huisnummer):18.1}</li>
-                <li>{Adres (Postcode):18.3} {Adres (Plaats):18.5}</li>
-                <li>{Adres (Land):18.6}</li>
-            </ul>   
-        </div>
-    </div>
-
-    <h1>Factuur</h1>
-
-   <?php
-        $kortingsCode = null;
+ <?php
+        $kortingsCode = '';
          if (!empty($entry[21])) {
             $kortingsCode = trim($entry[21]);
         }
@@ -404,30 +384,115 @@ div.participantsInfo ul {
         } 
 
         $parkingTicket = 10;
+        $numberParkingTickets = 0;
         $totalPrice = $totalPriceTicket;
         if (!empty($entry[22]) && $entry[22] == 'Ja') {
             $totalPrice += $parkingTicket;
+            $numberParkingTickets = 1;
         }
         
         $btw = $totalPrice * 0.21;
         $totalPriceBtw = $totalPrice * 1.21;
-    ?>
 
+        // Create invoice number
+        global $wpdb;
+        $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
 
+        $invoiceCount = $count + 1;
+        $invoiceNumber = 'HGKF2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT);   
+
+        $submission_id = $entry['id'];
+        $submission_date = date("d-m-Y");
+        $submission_dateDb = date("Y-m-d H:i:s");
+        $expiration_date = date('d-m-Y', strtotime("+14 days"));
+        $expiration_dateDb = date('Y-m-d H:i:s', strtotime("+14 days"));
+
+        $organization = $entry['16'];
+        $invoice_firstname = $entry['17.3'];
+        $invoice_lastname = $entry['17.6'];
+        $invoice_adress = $entry['18.1'];
+        $invoice_zipcode = $entry['18.3'];
+        $invoice_city = $entry['18.5'];
+        $invoice_email = $entry['19'];
+        $invoice_extra_information = $entry['20'];
+        $notes = $entry['23'];
+        $participant_firstname = $entry['15.3'];
+        $participant_lastname = $entry['15.6'];
+        $participant_email = $entry['13'];
+
+        global $wpdb;
+        $exists = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions WHERE submission_id = '$submission_id'");
+
+        if ($exists < 1) {
+            $wpdb->insert('word1_submissions',
+                array(
+                    'submission_id'=>$submission_id,
+                    'invoice_number'=>$invoiceNumber,
+                    'submission_type'=>'individueel',
+                    'submission_date'=>$submission_dateDb,
+                    'expiration_date'=>$expiration_dateDb,
+                    'organization'=>$organization,
+                    'invoice_firstname'=>$invoice_firstname,
+                    'invoice_lastname'=>$invoice_lastname,
+                    'invoice_adress'=>$invoice_adress,
+                    'invoice_zipcode'=>$invoice_zipcode,
+                    'invoice_city'=>$invoice_city,
+                    'price'=>$totalPrice,
+                    'tax'=>$btw,
+                    'price_tax'=>$totalPriceBtw,
+                    'invoice_email'=>$invoice_email,
+                    'invoice_extra_information'=>$invoice_extra_information,
+                    'parking_tickets'=>$numberParkingTickets,
+                    'reduction_code'=>$kortingsCode,
+                    'notes'=>$notes
+                )
+            );
+            
+            $submissionId = $wpdb->get_var("SELECT id FROM word1_submissions WHERE submission_id = '$submission_id'");
+            $wpdb->insert('word1_submission_participants',
+                array(
+                    'invoice_id'=>$submissionId,
+                    'first_name'=>$participant_firstname,
+                    'last_name'=>$participant_lastname,
+                    'email'=>$participant_email
+                )
+            );
+        }
+?>
+
+<div class="container">
+    <div class="header">
+
+        <div class="logo">
+            <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
+        </div>
+
+        <div class="naw">
+            <ul>
+                <li><b>{Organisatie:16}</b></li>
+                <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
+                <li>{Adres (Straat + huisnummer):18.1}</li>
+                <li>{Adres (Postcode):18.3} {Adres (Plaats):18.5}</li>
+                <li>{Adres (Land):18.6}</li>
+            </ul>   
+        </div>
+    </div>
+
+    <h1>Factuur</h1>
     <div class="general">
         <div class="general-first">
             <ul>
-            <!--  <li>
-                    <div class="general-label"><b>Factuurnummer</b></div>
-                    <div class="general-value">12345</div>
-                </li>
                 <li>
+                    <div class="general-label"><b>Factuurnummer</b></div>
+                    <div class="general-value"><?php echo $invoiceNumber; ?></div>
+                </li>
+              <!--  <li>
                     <div class="general-label"><b>Debiteurnummer</b></div>
                     <div class="general-value">453475</div>
                 </li>-->
                 <li>
                     <div class="general-label"><b>Uw referentie</b></div>
-                    <div class="general-value">{Specifieke informatie op de factuur:20}</div>
+                    <div class="general-value"><?php echo $invoice_extra_information; ?></div>
                 </li>
             </ul>    
         </div>
@@ -435,11 +500,11 @@ div.participantsInfo ul {
             <ul>
                 <li>
                     <div class="general-label"><b>Factuurdatum</b></div>
-                    <div class="general-value"><?php echo date("d-m-Y"); ?></div>
+                    <div class="general-value"><?php echo $submission_date; ?></div>
                 </li>
                 <li>
                     <div class="general-label"><b>Vervaldatum</b></div>
-                    <div class="general-value"><?php echo date('d-m-Y', strtotime("+14 days")); ?></div>
+                    <div class="general-value"><?php echo $expiration_date; ?></div>
                 </li>
             </ul>
         </div>
@@ -524,44 +589,6 @@ div.participantsInfo ul {
         <h1>Deelnemer</h1>
         <div>   
             <ul>
-
-                <?php
-                    $repeats = [];
-                    // Loop through each of the form fields and find any instances of a repeater.
-                    // This just loops through the fields NOT the actual entries, that's next.
-                    foreach ($form[fields] as $key=>$formField) {
-                        if (get_class($formField) == 'GF_Field_Repeater') {
-                            $repeaterID = $formField[id];
-                            $repeaterChildren = $formField[repeaterChildren];
-                        }
-                    }
-
-                    // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
-                    foreach ($entry as $key=>$formEntry) {
-                        if ($key == $repeaterID) {
-                            // Breakdown the repeater's inputs. us = un-serialized.
-                            $usEntry = unserialize($formEntry);
-                        }
-                    }
-                    
-                    foreach ($usEntry as $oneEntry) {
-                        // MATCH UP THE FIELDS AND INPUTS
-                        foreach ($form[fields] as $key=>$formField) {
-                            $fieldId = $formField[id];
-                            
-                            if (array_key_exists($fieldId, $oneEntry)) {
-                                $singleInput = implode(" ",$oneEntry[$fieldId]);
-                                // Only include inputs that aren't empty
-                                if (!empty($singleInput)) {
-                                    $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
-                                }
-                            }
-                        }
-                        array_push($repeats, $singleRepeat);
-                        unset($singleRepeat);
-                    } 
-                ?>
-
                 <li>Naam: {Naam (Voornaam):15.3} {Naam (Achternaam):15.6}</li>
                 <li>Email: {E-mailadres:13}</li>
             </ul>

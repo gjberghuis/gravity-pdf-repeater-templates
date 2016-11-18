@@ -437,10 +437,16 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     <div class="general">
         <div class="general-first">
             <ul>
-              <!--  <li>
+                 <?php
+                     $entryId = ($entry['id']); 
+                     $countEntries = GFAPI::count_entries(2);
+                     $invoiceNumber = str_pad($countEntries, 4, "0", STR_PAD_LEFT);   
+                 ?>
+               <li>
                     <div class="general-label"><b>Factuurnummer</b></div>
-                    <div class="general-value">12345</div>
+                    <div class="general-value"><? echo "HGKF2017" . $invoiceNumber ?></div>
                 </li>
+                <!--
                 <li>
                     <div class="general-label"><b>Debiteurnummer</b></div>
                     <div class="general-value">453475</div>
@@ -479,7 +485,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
                 </td>
 
                 <?php
-                    $participantsPrice = (count($participants)*195); 
+                    $participantsPrice = (count($participants)*175); 
                     $parkingTicket = 10;
                     $numberParkingTickets = 1;
                     if (!empty($entry[27])) {
@@ -494,7 +500,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
                 ?>
 
                 <td align="right"><?php echo number_format(count($participants), 2, ',', ''); ?></td>
-                <td align="right">€ 195,00</td>
+                <td align="right">€ 175,00</td>
                 <td align="right">21 %</td>
                 <td align="right">€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
             </tr>

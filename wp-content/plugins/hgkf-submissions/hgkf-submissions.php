@@ -195,10 +195,10 @@ function my_render_list_page(){
     echo '</tr>';
     echo '<tr>';
     echo '<td style="padding:20px;">';
-    echo '<input type="submit" value="Download deelnemers in csv" name="download_csv" />';
+    echo '<input type="submit" value="Download deelnemers in csv" name="download_participants" />';
     echo '</td>';
     echo '<td>';
-    echo '<input type="submit" value="Download voor exact" name="download_excel" />';
+    echo '<input type="submit" value="Download facturen in csv" name="download_invoices" />';
     echo '</td>';
     echo '</tr>';
     echo '</table>';
@@ -214,25 +214,10 @@ add_action( 'admin_init', 'convert_to_csv' );
 
 function convert_to_csv()
 {
-    if (isset($_POST['download_csv'])) {
-        $output_file_name = 'deelnemers.csv';
-        $delimiter = ',';
+    if (isset($_POST['download_participants']) || isset($_POST['download_invoices'])) {
+        $date = '2016-11-01';
+        $fromDate = date('Y-m-d', strtotime($date));
 
-        global $wpdb;
-        foreach ( $wpdb->get_col( "DESC " . 'word1_submissions', 0 ) as $column_name ) {
-            $header[] = $column_name;
-        }
-
-        $header[] = "participant_name";
-        $header[] = "participant_email";
-     
-        $f = fopen('php://output', 'w');
-        header('Content-type: application/csv');
-        header('Content-Disposition: attachment; filename='.$output_file_name);
-        fputcsv($f, $header);
-
-
-        $fromDate = date('Y-m-d');
         if (!empty($_POST['from_date'])) {
             $fromDate = $_POST['from_date'];
         }
@@ -240,6 +225,24 @@ function convert_to_csv()
         if (!empty($_POST['to_date'])) {
             $toDate = $_POST['to_date'];
         }
+
+        $output_file_name = 'deelnemers_' . $fromDate . '_' . $toDate . '.csv';
+        $delimiter = ',';
+
+        global $wpdb;
+        foreach ( $wpdb->get_col( "DESC " . 'word1_submissions', 0 ) as $column_name ) {
+            $header[] = $column_name;
+        }
+
+        if (isset($_POST['download_participants'])) {
+                $header[] = "participant_name";
+                $header[] = "participant_email";
+        }
+     
+        $f = fopen('php://output', 'w');
+        header('Content-type: application/csv');
+        header('Content-Disposition: attachment; filename='.$output_file_name);
+        fputcsv($f, $header);
 	    
         $submissions = $wpdb->get_results( "SELECT * FROM word1_submissions WHERE submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
 
@@ -247,20 +250,25 @@ function convert_to_csv()
         foreach ($submissions as $submission) {
             $submissionArray = (array) $submission;
 
-            $submissionId = $submissionArray['id'];
+            if (isset($_POST['download_participants'])) {
+                $submissionId = $submissionArray['id'];
 
-            $submissionsOParticipants = $wpdb->get_results( "SELECT * FROM word1_submission_participants where invoice_id = " . $submissionId);
+                $submissionsOParticipants = $wpdb->get_results( "SELECT * FROM word1_submission_participants where invoice_id = " . $submissionId);
 
-            foreach ($submissionsOParticipants as $participant) {
-                $participantArray = (array) $participant;
-                $lineArray = $submissionArray;
-                $lineArray[] = $participantArray['name'];
-                $lineArray[] = $participantArray['email'];           
-                /** default php csv handler **/
-                fputcsv($f, $lineArray);
+                foreach ($submissionsOParticipants as $participant) {
+                    $participantArray = (array) $participant;
+                    $lineArray = $submissionArray;
+                    $lineArray[] = $participantArray['name'];
+                    $lineArray[] = $participantArray['email'];           
+                    /** default php csv handler **/
+                    fputcsv($f, $lineArray);
+                }
+            } else {
+                fputcsv($f, $submissionArray);
             }
         } 
         fclose($f);
+        exit;
     }
 }
 

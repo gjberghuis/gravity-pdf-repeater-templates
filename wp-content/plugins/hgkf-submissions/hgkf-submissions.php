@@ -22,104 +22,12 @@ class My_submission_list extends WP_List_Table {
                 'plural'    => __( 'aanmeldingen', 'mylisttable' ),   
                 'ajax'      => false        
         ) );
-        add_action( 'admin_head', array( &$this, 'admin_header' ) );            
+        add_action( 'admin_head', array( $this, 'admin_header' ) );            
     }
 
-    function admin_header() {
-        $page = ( isset($_GET['page'] ) ) ? esc_attr( $_GET['page'] ) : false;
-        if( 'my_submissions_overview' != $page )
-        return;
-        echo '<style type="text/css">';
-        echo '.wp-list-table .column-id { width: 5%; }';
-      //  echo '.wp-list-table .column-invoice_number { width: 40%; }';
-      //  echo '.wp-list-table .column-submission_type { width: 35%; }';
-       // echo '.wp-list-table .column-submission_date { width: 20%;}';
-        echo '</style>';
-    }
-
-    function no_items() {
-        _e( 'Geen aanmeldingen gevonden.' );
-    }
-
-    function column_default( $item, $column_name ) {
-        switch( $column_name ) { 
-            case 'invoice_number':
-            case 'submission_type':
-            case 'submission_date':
-            case 'organization':
-            case 'invoice_firstname':
-            case 'invoice_lastname':
-            case 'price':
-            case 'price_tax':
-            case 'parking_tickets':
-            case 'reduction_code':
-            case 'notes':
-                return $item[ $column_name ];
-            default:
-                return print_r( $item, true ) ; //Show the whole array for troubleshooting purposes
-        }
-    }
-
-    function get_sortable_columns() {
-        $sortable_columns = array(
-            'invoice_number'  => array('invoice_number',false),
-            'submission_type' => array('submission_type',false),
-            'submission_date'   => array('submission_date',false)
-        );
-        return $sortable_columns;
-    }
-
-    function get_columns(){
-        $columns = array(
-            'invoice_number' => __( 'Factuur nummer', 'mylisttable' ),
-            'submission_type'    => __( 'Type aanmelding', 'mylisttable' ),
-            'submission_date'      => __( 'Inzend datum', 'mylisttable' ),
-            'organization' => __( 'Organisatie', 'mylisttable' ),
-            'invoice_firstname' => __( 'Voornaam', 'mylisttable' ),
-            'invoice_lastname' => __( 'Achternaam', 'mylisttable' ),
-            'price' => __( 'Prijs excl. Btw', 'mylisttable' ),       
-            'price_tax' => __( 'Prijs incl. Btw', 'mylisttable' ),
-            'parking_tickets' => __( 'Parkeertickets', 'mylisttable' ),
-            'reduction_code' => __( 'Kortingscode', 'mylisttable' ),
-            'notes' => __( 'Opmerkingen', 'mylisttable' )
-        );
-         return $columns;
-    }
-
-    function usort_reorder( $a, $b ) {
-        // If no sort, default to title
-        $orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'booktitle';
-        // If no order, default to asc
-        $order = ( ! empty($_GET['order'] ) ) ? $_GET['order'] : 'asc';
-        // Determine sort order
-        $result = strcmp( $a[$orderby], $b[$orderby] );
-        // Send final sort direction to usort
-        return ( $order === 'asc' ) ? $result : -$result;
-    }
-
-    function prepare_items() {
-        $columns  = $this->get_columns();
-        $hidden   = array();
-        $sortable = $this->get_sortable_columns();
-
-        $this->_column_headers = array( $columns, $hidden, $sortable );
-
-        usort( $this->example_data, array( &$this, 'usort_reorder' ) );
-        
-        $per_page = 5;
-        $current_page = $this->get_pagenum();
-        $total_items = count( $this->example_data );
-        // only ncessary because we have sample data
-        $this->found_data = array_slice( $this->example_data,( ( $current_page-1 )* $per_page ), $per_page );
-        $this->set_pagination_args( array(
-            'total_items' => $total_items,                  //WE have to calculate the total number of items
-            'per_page'    => $per_page                     //WE have to determine how many items to show on a page
-        ) );
-        $this->items = self::get_submissions($per_page, $current_page);
-    }
-
+    
     /**
-    * Retrieve customer’s data from the database
+    * Retrieve submission data from the database
     *
     * @param int $per_page
     * @param int $page_number
@@ -145,6 +53,175 @@ class My_submission_list extends WP_List_Table {
         $submissionCollection = $result;
         return $result;
     }
+
+/**
+ * Change the active status a submission in the export for exact
+ *
+ * @param int $id submission id
+ */
+public static function change_active_submission( $id ) {
+    global $wpdb;
+    $results = $wpdb->get_results("SELECT active from {$wpdb->prefix}submissions WHERE id = " . $id);
+
+    $newStatus = 1;
+    if ($results[0]->active == 1) {
+        $newStatus = 0;
+    }
+
+    $wpdb->query("UPDATE {$wpdb->prefix}submissions SET active=" . $newStatus . " WHERE id = " . $id);
+}
+
+	/**
+	 * Returns the count of records in the database.
+	 *
+	 * @return null|string
+	 */
+	public static function record_count() {
+		global $wpdb;
+
+		$sql = "SELECT COUNT(*) FROM {$wpdb->prefix}submissions";
+
+		return $wpdb->get_var( $sql );
+	}
+    
+    function column_default( $item, $column_name ) {
+        switch( $column_name ) { 
+            case 'invoice_number':
+            case 'active':
+            case 'submission_type':
+            case 'submission_date':
+            case 'organization':
+            case 'invoice_firstname':
+            case 'invoice_lastname':
+            case 'price':
+            case 'price_tax':
+            case 'parking_tickets':
+            case 'reduction_code':
+            case 'notes':
+                return $item[ $column_name ];
+            default:
+                return print_r( $item, true ) ; //Show the whole array for troubleshooting purposes
+        }
+    }
+
+    function no_items() {
+        _e( 'Geen aanmeldingen gevonden.' );
+    }
+    
+    function get_columns(){
+        $columns = array(
+            'cb'      => '<input type="checkbox" />',
+            'invoice_number' => __( 'Factuur nummer', 'mylisttable' ),
+            'active' => __( 'Negeren in export', 'mylisttable' ),
+            'submission_type'    => __( 'Type aanmelding', 'mylisttable' ),
+            'submission_date'      => __( 'Inzend datum', 'mylisttable' ),
+            'organization' => __( 'Organisatie', 'mylisttable' ),
+            'invoice_firstname' => __( 'Voornaam', 'mylisttable' ),
+            'invoice_lastname' => __( 'Achternaam', 'mylisttable' ),
+            'price' => __( 'Prijs excl. Btw', 'mylisttable' ),       
+            'price_tax' => __( 'Prijs incl. Btw', 'mylisttable' ),
+            'parking_tickets' => __( 'Parkeertickets', 'mylisttable' ),
+            'reduction_code' => __( 'Kortingscode', 'mylisttable' ),
+            'notes' => __( 'Opmerkingen', 'mylisttable' )
+        );
+         return $columns;
+    }
+
+    function column_active($item) {
+  $actions = array(
+            'active'    => sprintf('<a href="?page=%s&action=%s&submission=%s">Verander status</a>',$_REQUEST['page'],'active',$item['id'])
+        );
+
+  return sprintf('%1$s %2$s', $item['active'], $this->row_actions($actions) );
+}
+
+
+    function get_sortable_columns() {
+        $sortable_columns = array(
+            'invoice_number'  => array('invoice_number',false),
+            'submission_type' => array('submission_type',false),
+            'submission_date'   => array('submission_date',false)
+        );
+        return $sortable_columns;
+    }
+
+    function admin_header() {
+        $page = ( isset($_GET['page'] ) ) ? esc_attr( $_GET['page'] ) : false;
+        if( 'my_submissions_overview' != $page )
+        return;
+        echo '<style type="text/css">';
+        echo '.wp-list-table .column-id { width: 5%; }';
+      //  echo '.wp-list-table .column-invoice_number { width: 40%; }';
+      //  echo '.wp-list-table .column-submission_type { width: 35%; }';
+       // echo '.wp-list-table .column-submission_date { width: 20%;}';
+        echo '</style>';
+    }
+
+
+    function usort_reorder( $a, $b ) {
+        // If no sort, default to title
+        $orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'invoice_number';
+        // If no order, default to asc
+        $order = ( ! empty($_GET['order'] ) ) ? $_GET['order'] : 'asc';
+        // Determine sort order
+        $result = strcmp( $a[$orderby], $b[$orderby] );
+        // Send final sort direction to usort
+        return ( $order === 'asc' ) ? $result : -$result;
+    }
+
+    function prepare_items() {
+        $columns  = $this->get_columns();
+        $hidden   = array();
+        $sortable = $this->get_sortable_columns();
+
+        $this->_column_headers = array( $columns, $hidden, $sortable );
+
+        /** Process bulk action */
+        $this->process_bulk_action();
+        
+        $per_page = $this->get_items_per_page( 'submissions_per_page', 10 );
+        $current_page = $this->get_pagenum();
+        $total_items = self::record_count();
+
+        $this->set_pagination_args( array(
+            'total_items' => $total_items,                  //WE have to calculate the total number of items
+            'per_page'    => $per_page                     //WE have to determine how many items to show on a page
+        ) );
+        $this->items = self::get_submissions($per_page, $current_page);
+    }
+
+    public function process_bulk_action() {
+
+  //Detect when a bulk action is being triggered...
+  if ( 'active' === $this->current_action() ) {
+
+    // In our file that handles the request, verify the nonce.
+    $nonce = esc_attr( $_REQUEST['_wpnonce'] );
+
+    self::change_active_submission( absint( $_GET['submission'] ) );
+
+    wp_redirect( esc_url( add_query_arg() ) );
+    exit;
+  }
+
+  // If the delete bulk action is triggered
+  if ( ( isset( $_POST['action'] ) && $_POST['action'] == 'bulk-active' )
+       || ( isset( $_POST['action2'] ) && $_POST['action2'] == 'bulk-active' )
+  ) {
+
+    $delete_ids = esc_sql( $_POST['bulk-active'] );
+
+    // loop over the array of record IDs and delete them
+    foreach ( $delete_ids as $id ) {
+      self::change_active_submission( $id );
+
+    }
+
+    wp_redirect( esc_url( add_query_arg() ) );
+    exit;
+  }
+}
+
             
 } //class
 
@@ -158,8 +235,8 @@ function add_options() {
     $option = 'per_page';
     $args = array(
             'label' => 'Aanmeldingen',
-            'default' => 10,
-            'option' => 'books_per_page'
+            'default' => 5,
+            'option' => 'submissions_per_page'
             );
     add_screen_option( $option, $args );
     $myListTable = new My_submission_list();
@@ -226,7 +303,11 @@ function convert_to_csv()
             $toDate = $_POST['to_date'];
         }
 
-        $output_file_name = 'deelnemers_' . $fromDate . '_' . $toDate . '.csv';
+        $filenamePrefix = 'facturen_';
+        if(isset($_POST['download_participants'])) {
+            $filenamePrefix = 'deelnemers_';
+        }
+        $output_file_name = $filenamePrefix . $fromDate . '_' . $toDate . '.csv';
         $delimiter = ',';
 
         global $wpdb;
@@ -244,7 +325,7 @@ function convert_to_csv()
         header('Content-Disposition: attachment; filename='.$output_file_name);
         fputcsv($f, $header);
 	    
-        $submissions = $wpdb->get_results( "SELECT * FROM word1_submissions WHERE submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
+        $submissions = $wpdb->get_results( "SELECT * FROM word1_submissions WHERE active < 1 AND submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
 
         /** loop through array  */
         foreach ($submissions as $submission) {

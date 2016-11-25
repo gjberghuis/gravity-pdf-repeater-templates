@@ -325,7 +325,7 @@ function convert_to_csv()
         header('Content-Disposition: attachment; filename='.$output_file_name);
         fputcsv($f, $header);
 	    
-        $submissions = $wpdb->get_results( "SELECT * FROM word1_submissions WHERE active < 1 AND submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
+        $submissions = $wpdb->get_results( "SELECT * FROM word1_submissions WHERE active < 1 OR active is NULL AND submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
 
         /** loop through array  */
         foreach ($submissions as $submission) {

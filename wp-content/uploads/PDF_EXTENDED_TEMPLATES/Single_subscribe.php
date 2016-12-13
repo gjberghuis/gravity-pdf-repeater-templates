@@ -401,7 +401,7 @@ div.participantsInfo ul {
         $invoiceCount = $count + 1;
         $invoice_deb_nr = $invoiceCount + 12000;
         $invoice_book_nr = '71';
-        $invoice_cost_post = 'HKGF';
+        $invoice_cost_post = 'HGKF';
         $invoice_description = 'Deelname Het Grootste Kennisfestival';
         $invoice_row_description = 'Deelname Het Grootste Kennisfestival';
         $invoice_follow_nr = '2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT); 

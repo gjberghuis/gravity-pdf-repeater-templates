@@ -66,8 +66,8 @@ class reduction_codes extends WP_List_Table
     function column_default($item, $column_name)
     {
         switch ($column_name) {
-            case 'ticket_price':
             case 'code':
+            case 'ticket_price':
             case 'description':
                 return $item[ $column_name ];
             default:
@@ -79,8 +79,8 @@ class reduction_codes extends WP_List_Table
     function get_columns()
     {
         $columns = array(
-            'ticket_price' => __('Ticket prijs', 'reductioncodes'),
             'code' => __('Code', 'reductioncodes'),
+            'ticket_price' => __('Ticket prijs', 'reductioncodes'),
             'description' => __('Beschrijving', 'reductioncodes')
         );
         return $columns;
@@ -89,8 +89,8 @@ class reduction_codes extends WP_List_Table
     function get_sortable_columns()
     {
         $sortable_columns = array(
-            'ticket_price' => array('ticket_price', false),
             'code' => array('code', false),
+            'ticket_price' => array('ticket_price', false),
             'description' => array('description', false)
         );
         return $sortable_columns;

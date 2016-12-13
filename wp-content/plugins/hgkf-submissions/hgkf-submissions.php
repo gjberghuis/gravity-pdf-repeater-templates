@@ -169,7 +169,7 @@ function render_add_reduction_code_page() {
     echo '<label for="code" style="margin-right: 20px;">Code</label>';
     echo '</td>';
     echo '<td>';
-    echo '<input type="text" name="code" />';
+    echo '<input type="text" style="width:600px;" name="code" />';
     echo '</td>';
     echo '</tr>';
     echo '<tr><td><br/></td></tr>';
@@ -178,7 +178,7 @@ function render_add_reduction_code_page() {
     echo '<label for="description" style="margin-right: 20px;">Beschrijving</label>';
     echo '</td>';
     echo '<td>';
-    echo '<input type="text" name="description" />';
+    echo '<input type="text" style="width:600px;" name="description" />';
     echo '</td>';
     echo '</tr>';
     echo '<tr>';

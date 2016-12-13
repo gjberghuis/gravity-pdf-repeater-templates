@@ -362,26 +362,22 @@ div.participantsInfo ul {
 </style>
 
  <?php
+        $parkingTicket = 10;
+        $totalPriceTicket = 195;
         $kortingsCode = '';
-         if (!empty($entry[21])) {
+        if (!empty($entry[21])) {
             $kortingsCode = trim($entry[21]);
         }
 
-        $parkingTicket = 10;
-        $totalPriceTicket = 195;
-        if (!empty($kortingsCode)) {
-            if ($kortingsCode == 'Studenten2017@grootstekennis') {
-                $totalPriceTicket = 45;
-            } elseif ($kortingsCode == 'Partner2017@grootstekennis') {
-                $totalPriceTicket = 175;
-            } elseif ($kortingsCode == 'Samr2017@grootstekennis') {
-                $totalPriceTicket = 175;
-            } elseif ($kortingsCode == 'Performer2017@grootstekennis') {
-                $totalPriceTicket = 0;
-            } elseif ($kortingsCode == 'hulp2017@grootstekennis') {
-                $totalPriceTicket = 0;
-            } 
-        } 
+        global $wpdb;
+
+        $sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes where code = '" . $kortingsCode . "'";
+
+        $result = $wpdb->get_results($sql, 'ARRAY_A');
+
+        if (count($result) > 0) {
+            $totalPriceTicket = $result[0]['ticket_price'];
+        }
 
         $parkingTicket = 10;
         $numberParkingTickets = 0;

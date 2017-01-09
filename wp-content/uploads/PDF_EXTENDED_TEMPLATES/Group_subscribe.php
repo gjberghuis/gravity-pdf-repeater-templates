@@ -365,7 +365,6 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     $repeats = [];
     $participants =[];
 
-
     $mainParticipant = [];
     if (!empty($form_data['field'][15]["first"]) && !empty($form_data['field'][15]["last"])) {
         $mainParticipant['Naam'] = $form_data['field'][15]["first"] . " " . $form_data['field'][15]["last"];
@@ -394,7 +393,6 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     foreach ($usEntry as $keyOneEntry=>$oneEntry) {
         $participant = array();
-        
         // MATCH UP THE FIELDS AND INPUTS
         foreach ($form[fields] as $key=>$formField) {
             $fieldId = $formField[id];
@@ -415,12 +413,12 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     $participantsPrice = (count($participants)*175); 
     $parkingTicket = 10;
-    $numberParkingTickets = 1;
+    $numberParkingTickets = 0;
     if (!empty($entry[27])) {
         $numberParkingTickets = $entry[27];
     }
     $parkingCosts = $numberParkingTickets * $parkingTicket;
-    $btw = $participantsPrice * 0.21;
+    $btw = ($partkingCosts + $participantsPrice) * 0.21;
     $btwWithPartkingTicket = ($parkingCosts + $participantsPrice) * 0.21;
     $totalPrice = $parkingCosts + $participantsPrice;
     $totalPriceBtw = ($parkingCosts + $participantsPrice) * 1.21;
@@ -500,12 +498,12 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
             
             $submissionId = $wpdb->get_var("SELECT id FROM word1_submissions WHERE submission_id = '$submission_id'");
 
-            foreach ($participants as $particpant) {
+            foreach ($participants as $part) {
                 $wpdb->insert('word1_submission_participants',
                     array(
                         'invoice_id'=>$submissionId,
-                        'name'=>$particpant['Naam'],
-                        'email'=>$participant['E-mailadres'] 
+                        'name'=>$part['Naam'],
+                        'email'=>$part['E-mailadres'] 
                     )
                 );
             }

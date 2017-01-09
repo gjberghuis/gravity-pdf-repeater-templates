@@ -310,7 +310,8 @@ function convert_to_csv()
         }
 
         if (isset($_POST['download_participants'])) {
-            $header[] = "participant_name";
+            $header[] = "participant_firstname";
+            $header[] = "participant_lastname";
             $header[] = "participant_email";
         }
 
@@ -321,7 +322,7 @@ function convert_to_csv()
 
         $submissions = $wpdb->get_results("SELECT * FROM word1_submissions WHERE active < 1 OR active is NULL AND submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
 
-        /** loop through array  */
+        /* loop through array  */
         foreach ($submissions as $submission) {
             $submissionArray = (array)$submission;
 
@@ -342,9 +343,24 @@ function convert_to_csv()
 
                 foreach ($submissionsOParticipants as $participant) {
                     $participantArray = (array)$participant;
+
                     $lineArray = $submissionArray;
-                    $lineArray[] = $participantArray['name'];
+                
+                    $nameParticipant = explode(" ", $participantArray['name']);
+                    $firstnameParticipant = "";
+                    $lastnameParticipant = "";
+                    for ($i = 0; $i <= count($nameParticipant); $i++) {
+                        if ($i == 0) {
+                            $firstnameParticipant = $nameParticipant[$i];
+                        } else {
+                            $lastnameParticipant .= $nameParticipant[$i];    
+                        }
+                    }
+
+                    $lineArray[] = $firstnameParticipant;
+                    $lineArray[] = $lastnameParticipant;
                     $lineArray[] = $participantArray['email'];
+
                     /** default php csv handler **/
                     fputcsv($f, $lineArray, ';');
                 }

@@ -362,22 +362,26 @@ div.participantsInfo ul {
 </style>
 
  <?php
+        $kortingsCode = '';
+         if (!empty($entry[21])) {
+            $kortingsCode = trim($entry[21]);
+        }
+
         $parkingTicket = 10;
         $totalPriceTicket = 195;
-        $kortingsCode = '';
-        if (!empty($entry[21])) {
-            $kortingsCode = strtolower(trim($entry[21]));
-        }
-
-        global $wpdb;
-
-        $sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes where code = '" . $kortingsCode . "'";
-
-        $result = $wpdb->get_results($sql, 'ARRAY_A');
-
-        if (count($result) > 0) {
-            $totalPriceTicket = $result[0]['ticket_price'];
-        }
+        if (!empty($kortingsCode)) {
+            if ($kortingsCode == 'Studenten2017@grootstekennis') {
+                $totalPriceTicket = 45;
+            } elseif ($kortingsCode == 'Partner2017@grootstekennis') {
+                $totalPriceTicket = 175;
+            } elseif ($kortingsCode == 'Samr2017@grootstekennis') {
+                $totalPriceTicket = 175;
+            } elseif ($kortingsCode == 'Performer2017@grootstekennis') {
+                $totalPriceTicket = 0;
+            } elseif ($kortingsCode == 'hulp2017@grootstekennis') {
+                $totalPriceTicket = 0;
+            } 
+        } 
 
         $parkingTicket = 10;
         $numberParkingTickets = 0;
@@ -395,18 +399,11 @@ div.participantsInfo ul {
         $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
 
         $invoiceCount = $count + 1;
-        $invoice_deb_nr = $invoiceCount + 12000;
-        $invoice_book_nr = '71';
-        $invoice_cost_post = 'HGKF';
-        $invoice_description = 'Deelname Het Grootste Kennisfestival';
-        $invoice_row_description = 'Deelname Het Grootste Kennisfestival';
-        $invoice_follow_nr = '2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT); 
-        $invoiceNumber = $invoice_cost_post . $invoice_follow_nr;   
+        $invoiceNumber = 'HGKF2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT);   
 
         $submission_id = $entry['id'];
         $submission_date = date("d-m-Y");
         $submission_dateDb = date("Y-m-d H:i:s");
-        $invoice_expiration_days = '14';
         $expiration_date = date('d-m-Y', strtotime("+14 days"));
         $expiration_dateDb = date('Y-m-d H:i:s', strtotime("+14 days"));
 
@@ -418,8 +415,6 @@ div.participantsInfo ul {
         $invoice_city = $entry['18.5'];
         $invoice_email = $entry['19'];
         $invoice_extra_information = $entry['20'];
-        $invoice_event_nr = '8000';
-        $invoice_btw_type_nr = '2';
         $notes = $entry['23'];
         $participant_firstname = $entry['15.3'];
         $participant_lastname = $entry['15.6'];
@@ -432,16 +427,9 @@ div.participantsInfo ul {
             $wpdb->insert('word1_submissions',
                 array(
                     'submission_id'=>$submission_id,
-                    'invoice_debiteur_nr'=>$invoice_deb_nr,
                     'invoice_number'=>$invoiceNumber,
-                    'invoice_book_nr'=>$invoice_book_nr,
-                    'invoice_cost_post'=>$invoice_cost_post,
-                    'invoice_description'=>$invoice_description,
-                    'invoice_row_description'=>$invoice_row_description,
-                    'invoice_follow_nr'=>$invoice_follow_nr,
                     'submission_type'=>'individu',
                     'submission_date'=>$submission_dateDb,
-                    'invoice_expiration_days'=>$invoice_expiration_days,
                     'expiration_date'=>$expiration_dateDb,
                     'organization'=>$organization,
                     'invoice_firstname'=>$invoice_firstname,
@@ -449,9 +437,7 @@ div.participantsInfo ul {
                     'invoice_adress'=>$invoice_adress,
                     'invoice_zipcode'=>$invoice_zipcode,
                     'invoice_city'=>$invoice_city,
-                    'invoice_event_nr'=>$invoice_event_nr,
                     'price'=>$totalPrice,
-                    'invoice_btw_type'=>$invoice_btw_type_nr,
                     'tax'=>$btw,
                     'price_tax'=>$totalPriceBtw,
                     'invoice_email'=>$invoice_email,

@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 
 /*
- * Template Name: Aanmelding individueel
+ * Template Name: Aanmelding groep
  * Version: 1.0
- * Description: Een template voor een factuur van een individuele aanmelding
+ * Description: Een template voor een factuur van een groepsaanmelding
  * Author: Gert-Jan Berghuis
  * Group: Kennisfestival
  * License: GPLv2
@@ -207,7 +207,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
         margin: 0 auto;    
     }
 
-  div.logo {
+    div.logo {
         float:right;
         height: 200px;
         width: 20%;
@@ -258,139 +258,175 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     div.price {
         width: 100%;
+        float: left;
         margin-top: 60px;    
     }
 
-body {
-      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-}
-
-table {
-    width: 100%;
-    
-    border-collapse: collapse;
-}
-
-table td {
-    vertical-align: top;
-}
-
-div.price-info {
-    width: 100%;
-    display:inline-block;
-}
-
-div.total-price { 
-    width: 40%;
-    float:right;
-}
-
-div.total-price table {
-    width: 100%;
-    margin-top: 80px;
-}
-
- table th, table td{
-     border: 1px solid #ddd;
-    padding: 8px;
-}
-
-  table tr th { 
-        text-align:left;
-           background-color: #ede8c4;
-    color: black;
-      padding-top: 12px;
-    padding-bottom: 12px;
+    body {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     }
 
- table tr th.description { 
-        width: 50%;
+    table {
+        width: 100%;
+        
+        border-collapse: collapse;
     }
 
-div.payment-notification {
-    margin-top: 100px;
-    margin-bottom: 60px;
-}
+    table td {
+        vertical-align: top;
+    }
 
-div.payment-notification p {
-    display:block;
-    margin-top: 40px;
-}
+    div.total-price { 
+        width: 40%;
+        margin-left:auto; 
+        margin-right:0;
+    }
 
-div.info {
-    width: 90%;
-    bottom: 0;
-}
+    div.total-price table {
+        width: 100%;
+        margin-top: 80px;
+    }
 
-div.info-part{
-    width: 33%;
-    float: left;
-}
+    table th, table td{
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
 
-div.info-part-middle{
-    width: 33%;
-    float: left;
-}
+    table tr th { 
+            text-align:left;
+            background-color: #ede8c4;
+        color: black;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        }
 
-div.info-part-middle ul{
-display:table;
-margin:auto;
-}
+    table tr th.description { 
+            width: 50%;
+        }
 
-div.info-part-last{
-    width: 33%;
-    float: right;
-}
+  
 
-div.info-part-last ul{
-    float: right;
-}
+    div.payment-notification {
+        margin-top: 100px;
+        margin-bottom: 60px;
+    }
 
-table.people {
-    margin-top:20px;
-    margin-left:20px;
-    padding-top:20px;
-}   
-table.people ul {
-    list-style-type:none;
-}
+    div.payment-notification p {
+        display:block;
+        margin-top: 40px;
+    }
 
-div.participantsInfo ul {
+    div.info {
+        margin-top: 40px;
+        width: 90%;
+        position:absolute;
+        bottom: 0;
+    }
+
+    div.info-part{
+        width: 33%;
+        float: left;
+    }
+
+    div.info-part-middle{
+        width: 33%;
+        float: left;
+    }
+
+    div.info-part-middle ul{
+    display:table;
+    margin:auto;
+    }
+
+    div.info-part-last{
+        width: 33%;
+        float: right;
+    }
+
+    div.info-part-last ul{
+        float: right;
+    }
+
+   table.people {
+        margin-top:20px;
+        margin-left:20px;
+        padding-top:20px;
+    }   
+    table.people ul {
+        list-style-type:none;
+    }
+
+    div.participantsInfo ul {
     padding:0;
 }
-
 </style>
 
- <?php
-        $parkingTicket = 10;
-        $totalPriceTicket = 195;
-        $kortingsCode = '';
-        if (!empty($entry[21])) {
-            $kortingsCode = strtolower(trim($entry[21]));
+<?php
+    $repeats = [];
+    $participants =[];
+
+
+    $mainParticipant = [];
+    if (!empty($form_data['field'][15]["first"]) && !empty($form_data['field'][15]["last"])) {
+        $mainParticipant['Naam'] = $form_data['field'][15]["first"] . " " . $form_data['field'][15]["last"];
+    } 
+    if (!empty($entry[13])) {
+        $mainParticipant['E-mailadres'] = $entry[13];
+    } 
+    $participants[] = $mainParticipant;
+
+    // Loop through each of the form fields and find any instances of a repeater.
+    // This just loops through the fields NOT the actual entries, that's next.
+    foreach ($form[fields] as $key=>$formField) {
+        if (get_class($formField) == 'GF_Field_Repeater') {
+            $repeaterID = $formField[id];
+            $repeaterChildren = $formField[repeaterChildren];
         }
+    }
 
-        global $wpdb;
-
-        $sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes where code = '" . $kortingsCode . "'";
-
-        $result = $wpdb->get_results($sql, 'ARRAY_A');
-
-        if (count($result) > 0) {
-            $totalPriceTicket = $result[0]['ticket_price'];
+    // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
+    foreach ($entry as $key=>$formEntry) {
+        if ($key == $repeaterID) {
+            // Breakdown the repeater's inputs. us = un-serialized.
+            $usEntry = unserialize($formEntry);
         }
+    }
 
-        $parkingTicket = 10;
-        $numberParkingTickets = 0;
-        $totalPrice = $totalPriceTicket;
-        if (!empty($entry[22]) && $entry[22] == 'Ja') {
-            $totalPrice += $parkingTicket;
-            $numberParkingTickets = 1;
-        }
+    foreach ($usEntry as $keyOneEntry=>$oneEntry) {
+        $participant = array();
         
-        $btw = $totalPrice * 0.21;
-        $totalPriceBtw = $totalPrice * 1.21;
+        // MATCH UP THE FIELDS AND INPUTS
+        foreach ($form[fields] as $key=>$formField) {
+            $fieldId = $formField[id];
+            if (array_key_exists($fieldId, $oneEntry)) {
+                $singleInput = implode(" ",$oneEntry[$fieldId]);
+                // Only include inputs that aren't empty
+                    if (!empty($singleInput)) {
+                    $participant[$formField[label]] = $singleInput;
+                    $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
+                }
+            }
+        }
+        $participants[] = $participant;
 
-        // Create invoice number
+        array_push($repeats, $singleRepeat);
+        unset($singleRepeat);
+    }
+
+    $participantsPrice = (count($participants)*175); 
+    $parkingTicket = 10;
+    $numberParkingTickets = 1;
+    if (!empty($entry[27])) {
+        $numberParkingTickets = $entry[27];
+    }
+    $parkingCosts = $numberParkingTickets * $parkingTicket;
+    $btw = $participantsPrice * 0.21;
+    $btwWithPartkingTicket = ($parkingCosts + $participantsPrice) * 0.21;
+    $totalPrice = $parkingCosts + $participantsPrice;
+    $totalPriceBtw = ($parkingCosts + $participantsPrice) * 1.21;
+    $totalPriceWithoutParkingTicket = $participantsPrice * 1.21;
+
+    // Create invoice number
         global $wpdb;
         $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
 
@@ -401,7 +437,7 @@ div.participantsInfo ul {
         $invoice_description = 'Deelname Het Grootste Kennisfestival';
         $invoice_row_description = 'Deelname Het Grootste Kennisfestival';
         $invoice_follow_nr = '2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT); 
-        $invoiceNumber = $invoice_cost_post . $invoice_follow_nr;   
+        $invoiceNumber = $invoice_cost_post . $invoice_follow_nr;  
 
         $submission_id = $entry['id'];
         $submission_date = date("d-m-Y");
@@ -439,7 +475,7 @@ div.participantsInfo ul {
                     'invoice_description'=>$invoice_description,
                     'invoice_row_description'=>$invoice_row_description,
                     'invoice_follow_nr'=>$invoice_follow_nr,
-                    'submission_type'=>'individu',
+                    'submission_type'=>'groep',
                     'submission_date'=>$submission_dateDb,
                     'invoice_expiration_days'=>$invoice_expiration_days,
                     'expiration_date'=>$expiration_dateDb,
@@ -457,28 +493,27 @@ div.participantsInfo ul {
                     'invoice_email'=>$invoice_email,
                     'invoice_extra_information'=>$invoice_extra_information,
                     'parking_tickets'=>$numberParkingTickets,
-                    'reduction_code'=>$kortingsCode,
+                    //'reduction_code'=>$kortingsCode,
                     'notes'=>$notes
                 )
             );
             
             $submissionId = $wpdb->get_var("SELECT id FROM word1_submissions WHERE submission_id = '$submission_id'");
-            $wpdb->insert('word1_submission_participants',
-                array(
-                    'invoice_id'=>$submissionId,
-                    'name'=>$participant_firstname . ' ' . $participant_lastname,
-                    'email'=>$participant_email
-                )
-            );
+
+            foreach ($participants as $participant) {
+                $wpdb->insert('word1_submission_participants',
+                    array(
+                        'invoice_id'=>$submissionId,
+                        'name'=>$partiicpant['Naam'],
+                        'email'=>$participant['E-mailadres'] 
+                    )
+                );
+            }
         }
 ?>
 
 <div class="container">
     <div class="header">
-
-        <div class="logo">
-            <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
-        </div>
 
         <div class="naw">
             <ul>
@@ -489,23 +524,28 @@ div.participantsInfo ul {
                 <li>{Adres (Land):18.6}</li>
             </ul>   
         </div>
+        <div class="logo">
+            <img src="http://www.hetgrootstekennisfestivalvannederland.nl/site/wp-content/uploads/PDF_EXTENDED_TEMPLATES/images/logo-regioacademy.png"></img>
+        </div>
     </div>
 
     <h1>Factuur</h1>
+
     <div class="general">
         <div class="general-first">
             <ul>
-                <li>
+               <li>
                     <div class="general-label"><b>Factuurnummer</b></div>
                     <div class="general-value"><?php echo $invoiceNumber; ?></div>
                 </li>
-              <!--  <li>
+                <!--
+                <li>
                     <div class="general-label"><b>Debiteurnummer</b></div>
                     <div class="general-value">453475</div>
-                </li>-->
+                </li> -->
                 <li>
                     <div class="general-label"><b>Uw referentie</b></div>
-                    <div class="general-value"><?php echo $invoice_extra_information; ?></div>
+                    <div class="general-value">{Specifieke informatie op de factuur:20}</div>
                 </li>
             </ul>    
         </div>
@@ -513,11 +553,11 @@ div.participantsInfo ul {
             <ul>
                 <li>
                     <div class="general-label"><b>Factuurdatum</b></div>
-                    <div class="general-value"><?php echo $submission_date; ?></div>
+                    <div class="general-value"><?php echo date("d-m-Y"); ?></div>
                 </li>
                 <li>
                     <div class="general-label"><b>Vervaldatum</b></div>
-                    <div class="general-value"><?php echo $expiration_date; ?></div>
+                    <div class="general-value"><?php echo date('d-m-Y', strtotime("+14 days")); ?></div>
                 </li>
             </ul>
         </div>
@@ -533,49 +573,63 @@ div.participantsInfo ul {
                 <th>Totaalbedrag</th>
             </tr>
             <tr>
-                <td>Deelname Het Grootste Kennisfestival       
+                <td>Deelname Het Grootste Kennisfestival
                 </td>
-                <td align="right">1,00</td>
-                <td align="right">€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
+                <td align="right"><?php echo number_format(count($participants), 2, ',', ''); ?></td>
+                <td align="right">€ 175,00</td>
                 <td align="right">21 %</td>
-                <td align="right">€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
             </tr>
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
                 <td>Parkeerticket</td>
-                <td align="right">1,00</td>
-                <td align="right">€ <?php echo number_format($parkingTicket, 2, ',', ''); ?></td>
+                <td align="right"><?php echo number_format($numberParkingTickets, 2, ',', ''); ?></td>
+                <td align="right">€ 10,00</td>
                 <td align="right">21 %</td>
-                <td align="right">€ <?php echo number_format($parkingTicket, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($parkingCosts, 2, ',', ''); ?></td>
             </tr>
             [/gravityforms]
         </table>
     </div>
 
-    <div class="price-info">
-        <div class="total-price">
-            <table>
-                <tr>
-                    <td>Totaal exclusief BTW</td>
+    <div class="total-price">
+        <table>
+            <tr>
+                <td>Totaal exclusief BTW</td>
+                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
                     <td align="right">€ <?php echo number_format($totalPrice, 2, ',', ''); ?></td>
-                </tr>
-                <tr>
-                    <td>BTW 21%</td>
-                    <td align="right">€ <?php echo number_format($btw, 2, ',', ''); ?></td>
-                </tr>
-                <tr>
-                    <th>Totaal te voldoen</th>
+                    [/gravityforms]
+                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
+                <td align="right">€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
+                [/gravityforms]
+            </tr>
+            <tr>
+                <td>BTW 21%</td>
+                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
+                    <td align="right">€ <?php echo number_format($btwWithPartkingTicket, 2, ',', ''); ?></td>
+                    [/gravityforms]
+                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
+                <td align="right">€ <?php echo number_format($btw, 2, ',', ''); ?></td>
+                [/gravityforms]
+            </tr>
+            <tr>
+                <th>Totaal te voldoen</th>
+                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
                     <th align="right">€ <?php echo number_format($totalPriceBtw, 2, ',', ''); ?></th>
-                </tr>
-            </table>
-        </div>
+                    [/gravityforms]
+                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
+                <th align="right">€ <?php echo number_format($totalPriceWithoutParkingTicket, 2, ',', ''); ?></th>
+                [/gravityforms]
+            </tr>
+
+        </table>
     </div>
 
     <div class="payment-notification">
       Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben naar aanleiding van deze factuur dan kan je een mail sturen naar  administratie@regioacademy.nl. Dan nemen we zo snel mogelijk contact met je op.
     </div>
 
-    <div class="info">
+   <div class="info">
         <div class="info-part">
             <ul>
                 <li>Regio Academy</li>
@@ -599,12 +653,27 @@ div.participantsInfo ul {
     </div>
 
     <div class="participantsInfo">
-        <h1>Deelnemer</h1>
+        <h1>Deelnemers</h1>
         <div>   
-            <ul>
-                <li>Naam: {Naam (Voornaam):15.3} {Naam (Achternaam):15.6}</li>
-                <li>Email: {E-mailadres:13}</li>
-            </ul>
+           <table class="people">
+                <tr>
+                    <th>Naam</th>
+                    <th>Emailadres</th>
+                </tr>    
+                
+                <?php
+                    foreach ($participants as $key => $value) {
+                ?>
+
+                <tr>
+                    <td><?php echo($value['Naam']) ?></td>
+                    <td><?php echo $value['E-mailadres']; ?></td>
+                </tr>
+                    
+                <?php 
+                    } 
+                ?>
+            </table>        
         </div>
     </div>
-</div>
+</div>            

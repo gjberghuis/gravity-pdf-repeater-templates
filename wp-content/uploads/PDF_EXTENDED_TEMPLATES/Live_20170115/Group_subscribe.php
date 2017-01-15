@@ -418,7 +418,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
         $numberParkingTickets = $entry[27];
     }
     $parkingCosts = $numberParkingTickets * $parkingTicket;
-    $btw = ($parkingCosts + $participantsPrice) * 0.21;
+    $btw = ($partkingCosts + $participantsPrice) * 0.21;
     $btwWithPartkingTicket = ($parkingCosts + $participantsPrice) * 0.21;
     $totalPrice = $parkingCosts + $participantsPrice;
     $totalPriceBtw = ($parkingCosts + $participantsPrice) * 1.21;

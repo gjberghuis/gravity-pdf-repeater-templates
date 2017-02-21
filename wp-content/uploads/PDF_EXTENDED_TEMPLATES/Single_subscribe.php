@@ -362,7 +362,7 @@ div.participantsInfo ul {
 </style>
 
  <?php
-        $parkingTicket = 10;
+        // Calculate price of a ticket
         $totalPriceTicket = 195;
         $kortingsCode = '';
         if (!empty($entry[21])) {
@@ -379,16 +379,59 @@ div.participantsInfo ul {
             $totalPriceTicket = $result[0]['ticket_price'];
         }
 
+        // Add parking ticket costs to the ticket
         $parkingTicket = 10;
         $numberParkingTickets = 0;
-        $totalPrice = $totalPriceTicket;
+        $total_price = $totalPriceTicket;
         if (!empty($entry[22]) && $entry[22] == 'Ja') {
-            $totalPrice += $parkingTicket;
+            $total_price += $parkingTicket;
             $numberParkingTickets = 1;
         }
         
-        $btw = $totalPrice * 0.21;
-        $totalPriceBtw = $totalPrice * 1.21;
+        // Calculate the btw
+        $btw_low_nr = '1';
+        $btw_low = 0.06;
+        $btw_high_nr = '2';
+        $btw_high = 0.21;
+        $food_price = 19.25;
+
+        // Calculate high btw First substract the food (low btw) and split into parking ticket and ticket
+        if ($numberParkingTickets > 0) {
+            $price_part_high_parkingticket = ($numberParkingTickets * $parkingTicket);
+            $price_part_high_btw_parkingticket = $price_part_high_parkingticket * $btw_high;
+            $total_price_part_high_btw_parkingticket = $price_part_high_parkingticket + $price_part_high_btw_parkingticket;
+
+            $price_part_high_ticket = ($total_price - $food_price - ($numberParkingTickets * $parkingTicket));
+            $price_part_high_btw = $price_part_high_ticket + $price_part_high_parkingticket;
+            $price_part_high_btw_ticket = $price_part_high_ticket * $btw_high;
+            $total_price_part_high_btw_ticket = $price_part_high_ticket + $price_part_high_btw_ticket;
+
+            $btw_part_high_btw = $price_part_high_btw_parkingticket + $price_part_high_btw_ticket;
+        } else {
+            $price_part_high_ticket = $total_price - $food_price;  
+            $price_part_high_btw = $price_part_high_ticket;
+            $price_part_high_btw_ticket = $price_part_high_ticket * $btw_high;
+            $total_price_part_high_btw_ticket = $price_part_high_ticket + $price_part_high_btw_ticket;
+
+            $btw_part_high_btw = $price_part_high_btw_ticket;
+        }
+
+        $total_price_part_high_btw = $price_part_high_btw + $btw_part_high_btw;
+
+        // Calculate low btw
+        $btw_part_low_btw = $food_price * $btw_low;
+        $total_price_part_low_btw = $food_price + $btw_part_low_btw;
+
+        // Payment details
+        $payment_detail_description_low_btw = 'Deelname Het Grootste Kennisfestival';
+        $payment_detail_description_high_btw = 'Deelname Het Grootste Kennisfestival';
+        $payment_detail_event_nr_low_btw = 'Deelname Het Grootste Kennisfestival';
+        $payment_detail_event_nr_high_btw = 'Deelname Het Grootste Kennisfestival';
+        $payment_detail_low_btw = 'Deelname Het Grootste Kennisfestival';
+        $payment_detail_high_btw = 'Deelname Het Grootste Kennisfestival';
+
+        $total_btw = $total_price * 0.21;
+        $total_price_btw = $total_price_part_low_btw + $total_price_part_high_btw;
 
         // Create invoice number
         global $wpdb;
@@ -450,10 +493,10 @@ div.participantsInfo ul {
                     'invoice_zipcode'=>$invoice_zipcode,
                     'invoice_city'=>$invoice_city,
                     'invoice_event_nr'=>$invoice_event_nr,
-                    'price'=>$totalPrice,
+                    'price'=>$total_price,
                     'invoice_btw_type'=>$invoice_btw_type_nr,
-                    'tax'=>$btw,
-                    'price_tax'=>$totalPriceBtw,
+                    'tax'=>$total_btw,
+                    'price_tax'=>$total_price_btw,
                     'invoice_email'=>$invoice_email,
                     'invoice_extra_information'=>$invoice_extra_information,
                     'parking_tickets'=>$numberParkingTickets,
@@ -468,6 +511,34 @@ div.participantsInfo ul {
                     'invoice_id'=>$submissionId,
                     'name'=>$participant_firstname . ' ' . $participant_lastname,
                     'email'=>$participant_email
+                )
+            );
+
+            // First payment detail: insert the entree payment detail row (with btw high)
+            $wpdb->insert('word1_submission_payment_details',
+                array(
+                    'invoice_id'=>$submissionId,
+                    'event'=>$payment_detail_event_nr_high_btw,
+                    'price'=>$price_part_high_btw,
+                    'btw_type'=>$btw_high_nr,
+                    'tax'=>$btw_part_high_btw,
+                    'row_description'=>$payment_detail_description_high_btw,
+                    'price_tax'=>$total_price_part_high_btw,
+                    'invoice_number'=>$invoiceNumber
+                )
+            );
+            
+            // Second payment detail: insert the food payment detail row (with btw low)
+            $wpdb->insert('word1_submission_payment_details',
+                array(
+                    'invoice_id'=>$submissionId,    
+                    'event'=>$payment_detail_event_nr_low_btw,
+                    'price'=>$food_price,
+                    'btw_type'=>$btw_low_nr,
+                    'tax'=>$btw_part_low_btw,
+                    'row_description'=>$payment_detail_description_low_btw,
+                    'price_tax'=>$total_price_part_low_btw,
+                    'invoice_number'=>$invoiceNumber
                 )
             );
         }
@@ -533,12 +604,20 @@ div.participantsInfo ul {
                 <th>Totaalbedrag</th>
             </tr>
             <tr>
-                <td>Deelname Het Grootste Kennisfestival       
+                <td>Deelname Het Grootste Kennisfestival 2017       
                 </td>
                 <td align="right">1,00</td>
-                <td align="right">€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($price_part_high_ticket, 2, ',', ''); ?></td>
                 <td align="right">21 %</td>
-                <td align="right">€ <?php echo number_format($totalPriceTicket, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($price_part_high_ticket, 2, ',', ''); ?></td>
+            </tr>
+            <tr>
+                <td>Lekker eten en drinken
+                </td>
+                <td align="right">1,00</td>
+                <td align="right">€ <?php echo number_format($food_price, 2, ',', ''); ?></td>
+                <td align="right">6 %</td>
+                <td align="right">€ <?php echo number_format($food_price, 2, ',', ''); ?></td>
             </tr>
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
@@ -557,15 +636,19 @@ div.participantsInfo ul {
             <table>
                 <tr>
                     <td>Totaal exclusief BTW</td>
-                    <td align="right">€ <?php echo number_format($totalPrice, 2, ',', ''); ?></td>
+                    <td align="right">€ <?php echo number_format($total_price, 2, ',', ''); ?></td>
                 </tr>
                 <tr>
                     <td>BTW 21%</td>
-                    <td align="right">€ <?php echo number_format($btw, 2, ',', ''); ?></td>
+                    <td align="right">€ <?php echo number_format($btw_part_high_btw, 2, ',', ''); ?></td>
+                </tr>
+                <tr>
+                    <td>BTW 6%</td>
+                    <td align="right">€ <?php echo number_format($btw_part_low_btw, 2, ',', ''); ?></td>
                 </tr>
                 <tr>
                     <th>Totaal te voldoen</th>
-                    <th align="right">€ <?php echo number_format($totalPriceBtw, 2, ',', ''); ?></th>
+                    <th align="right">€ <?php echo number_format($total_price_btw, 2, ',', ''); ?></th>
                 </tr>
             </table>
         </div>

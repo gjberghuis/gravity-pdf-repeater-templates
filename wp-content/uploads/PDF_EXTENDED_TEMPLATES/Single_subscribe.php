@@ -431,7 +431,7 @@ div.participantsInfo ul {
         $payment_detail_high_btw = 'Deelname Het Grootste Kennisfestival';
 
         $total_btw = $total_price * 0.21;
-        $total_price_btw = $total_price_part_low_btw + $total_price_part_high_btw;
+        $total_price_btw = $total_price + $btw_part_low_btw + $btw_part_high_btw;
 
         // Create invoice number
         global $wpdb;

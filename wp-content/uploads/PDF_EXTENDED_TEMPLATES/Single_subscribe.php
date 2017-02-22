@@ -423,12 +423,10 @@ div.participantsInfo ul {
         $total_price_part_low_btw = $food_price + $btw_part_low_btw;
 
         // Payment details
-        $payment_detail_description_low_btw = 'Deelname Het Grootste Kennisfestival';
+        $payment_detail_description_low_btw = 'Vertering Het Grootste Kennisfestival';
         $payment_detail_description_high_btw = 'Deelname Het Grootste Kennisfestival';
-        $payment_detail_event_nr_low_btw = 'Deelname Het Grootste Kennisfestival';
-        $payment_detail_event_nr_high_btw = 'Deelname Het Grootste Kennisfestival';
-        $payment_detail_low_btw = 'Deelname Het Grootste Kennisfestival';
-        $payment_detail_high_btw = 'Deelname Het Grootste Kennisfestival';
+        $payment_detail_event_nr_low_btw = '8030';
+        $payment_detail_event_nr_high_btw = '8000';
 
         $total_btw = $total_price * 0.21;
         $total_price_btw = $total_price + $btw_part_low_btw + $btw_part_high_btw;

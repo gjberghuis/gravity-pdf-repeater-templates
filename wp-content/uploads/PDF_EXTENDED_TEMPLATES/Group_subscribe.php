@@ -363,6 +363,9 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
 <?php
     $repeats = [];
+
+    /* PARTICIPANTS */
+    // Create array with all participants en set the mainparticipant
     $participants =[];
 
     $mainParticipant = [];
@@ -374,8 +377,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     } 
     $participants[] = $mainParticipant;
 
-    // Loop through each of the form fields and find any instances of a repeater.
-    // This just loops through the fields NOT the actual entries, that's next.
+    // Search for repeater fields and loop through the repeater field -> 'Meer deelnemers toevoegen'
     foreach ($form[fields] as $key=>$formField) {
         if (get_class($formField) == 'GF_Field_Repeater') {
             $repeaterID = $formField[id];
@@ -411,103 +413,164 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
         unset($singleRepeat);
     }
 
-    $participantsPrice = (count($participants)*175); 
-    $parkingTicket = 10;
-    $numberParkingTickets = 0;
+    /* PAYMENT DETAILS */
+     // Btw constants
+    $btw_low_nr = '1';
+    $btw_low = 0.06;
+    $btw_high_nr = '2';
+    $btw_high = 0.21;
+
+    // Parking costs
+    $parking_ticket = 10;
+    $number_parking_tickets = 0;
     if (!empty($entry[27])) {
-        $numberParkingTickets = $entry[27];
+        $number_parking_tickets = $entry[27];
     }
-    $parkingCosts = $numberParkingTickets * $parkingTicket;
-    $btw = ($parkingCosts + $participantsPrice) * 0.21;
-    $btwWithPartkingTicket = ($parkingCosts + $participantsPrice) * 0.21;
-    $totalPrice = $parkingCosts + $participantsPrice;
-    $totalPriceBtw = ($parkingCosts + $participantsPrice) * 1.21;
-    $totalPriceWithoutParkingTicket = $participantsPrice * 1.21;
+    $parking_costs = $number_parking_tickets * $parking_ticket;
+    $parking_costs_btw = $parking_costs * $btw_high;
 
+    // Food
+    $food_price = 19.25;
+    $food_costs = $food_price * count($participants);
+    $food_costs_btw = $food_costs * $btw_low;
+    
+    // Participants
+    $participant_price = 175;
+    $participants_costs = (count($participants) * $participant_price) - $food_costs; 
+    $participants_costs_btw = $participants_costs * $btw_high;
+    $participants_costs_without_food = $particpants_costs - $food_costs;
+
+    // Totals    
+    $total_btw_high = $participants_costs_btw + $parking_costs_btw;
+    $total_btw_low = $food_costs_btw;
+    $total_price_low = $food_costs + $food_costs_btw;
+
+    $total_price_highbtw = $participants_costs + $parking_costs;
+    $total_price_highbtw_btw = $participants_costs_btw + $parking_costs_btw;
+    $total_price_highbtw_total = $total_price_highbtw + $total_price_highbtw_btw;
+
+    $total_price = $parking_costs + $food_costs + $participants_costs;
+    $total_btw = $total_btw_high + $total_btw_low;
+    $total_price_btw = $total_price + $total_btw;
+
+    // Extra payment detail for exact
+    $payment_detail_description_low_btw = 'Vertering Het Grootste Kennisfestival';
+    $payment_detail_description_high_btw = 'Deelname Het Grootste Kennisfestival';
+    $payment_detail_event_nr_low_btw = '8030';
+    $payment_detail_event_nr_high_btw = '8000';
+    
     // Create invoice number
-        global $wpdb;
-        $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
+    global $wpdb;
+    $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
 
-        $invoiceCount = $count + 1;
-        $invoice_deb_nr = $invoiceCount + 12000;
-        $invoice_book_nr = '71';
-        $invoice_cost_post = 'HGKF';
-        $invoice_description = 'Deelname Het Grootste Kennisfestival';
-        $invoice_row_description = 'Deelname Het Grootste Kennisfestival';
-        $invoice_follow_nr = '2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT); 
-        $invoiceNumber = $invoice_cost_post . $invoice_follow_nr;  
+    $invoiceCount = $count + 1;
+    $invoice_deb_nr = $invoiceCount + 12000;
+    $invoice_book_nr = '71';
+    $invoice_cost_post = 'HGKF';
+    $invoice_description = 'Deelname Het Grootste Kennisfestival';
+    $invoice_row_description = 'Deelname Het Grootste Kennisfestival';
+    $invoice_follow_nr = '2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT); 
+    $invoiceNumber = $invoice_cost_post . $invoice_follow_nr;  
 
-        $submission_id = $entry['id'];
-        $submission_date = date("d-m-Y");
-        $submission_dateDb = date("Y-m-d H:i:s");
-        $invoice_expiration_days = '14';
-        $expiration_date = date('d-m-Y', strtotime("+14 days"));
-        $expiration_dateDb = date('Y-m-d H:i:s', strtotime("+14 days"));
+    $submission_id = $entry['id'];
+    $submission_date = date("d-m-Y");
+    $submission_dateDb = date("Y-m-d H:i:s");
+    $invoice_expiration_days = '14';
+    $expiration_date = date('d-m-Y', strtotime("+14 days"));
+    $expiration_dateDb = date('Y-m-d H:i:s', strtotime("+14 days"));
 
-        $organization = $entry['16'];
-        $invoice_firstname = $entry['17.3'];
-        $invoice_lastname = $entry['17.6'];
-        $invoice_adress = $entry['18.1'];
-        $invoice_zipcode = $entry['18.3'];
-        $invoice_city = $entry['18.5'];
-        $invoice_email = $entry['19'];
-        $invoice_extra_information = $entry['20'];
-        $invoice_event_nr = '8000';
-        $invoice_btw_type_nr = '2';
-        $notes = $entry['23'];
-        $participant_firstname = $entry['15.3'];
-        $participant_lastname = $entry['15.6'];
-        $participant_email = $entry['13'];
+    $organization = $entry['16'];
+    $invoice_firstname = $entry['17.3'];
+    $invoice_lastname = $entry['17.6'];
+    $invoice_adress = $entry['18.1'];
+    $invoice_zipcode = $entry['18.3'];
+    $invoice_city = $entry['18.5'];
+    $invoice_email = $entry['19'];
+    $invoice_extra_information = $entry['20'];
+    $invoice_event_nr = '8000';
+    $invoice_btw_type_nr = '2';
+    $notes = $entry['23'];
+    $participant_firstname = $entry['15.3'];
+    $participant_lastname = $entry['15.6'];
+    $participant_email = $entry['13'];
 
-        global $wpdb;
-        $exists = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions WHERE submission_id = '$submission_id'");
+    global $wpdb;
+    $exists = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions WHERE submission_id = '$submission_id'");
+    
+    if ($exists < 1) {
+        $wpdb->insert('word1_submissions',
+            array(
+                'submission_id'=>$submission_id,
+                'invoice_debiteur_nr'=>$invoice_deb_nr,
+                'invoice_number'=>$invoiceNumber,
+                'invoice_book_nr'=>$invoice_book_nr,
+                'invoice_cost_post'=>$invoice_cost_post,
+                'invoice_description'=>$invoice_description,
+                'invoice_row_description'=>$invoice_row_description,
+                'invoice_follow_nr'=>$invoice_follow_nr,
+                'submission_type'=>'groep',
+                'submission_date'=>$submission_dateDb,
+                'invoice_expiration_days'=>$invoice_expiration_days,
+                'expiration_date'=>$expiration_dateDb,
+                'organization'=>$organization,
+                'invoice_firstname'=>$invoice_firstname,
+                'invoice_lastname'=>$invoice_lastname,
+                'invoice_adress'=>$invoice_adress,
+                'invoice_zipcode'=>$invoice_zipcode,
+                'invoice_city'=>$invoice_city,
+                'invoice_event_nr'=>$invoice_event_nr,
+                'price'=>$total_price,
+                'invoice_btw_type'=>$invoice_btw_type_nr,
+                'tax'=>$total_btw,
+                'price_tax'=>$total_price_btw,
+                'invoice_email'=>$invoice_email,
+                'invoice_extra_information'=>$invoice_extra_information,
+                'parking_tickets'=>$number_parking_tickets,
+                //'reduction_code'=>$kortingsCode,
+                'notes'=>$notes
+            )
+        );
         
-        if ($exists < 1) {
-            $wpdb->insert('word1_submissions',
+        $submissionId = $wpdb->get_var("SELECT id FROM word1_submissions WHERE submission_id = '$submission_id'");
+
+        foreach ($participants as $part) {
+            $wpdb->insert('word1_submission_participants',
                 array(
-                    'submission_id'=>$submission_id,
-                    'invoice_debiteur_nr'=>$invoice_deb_nr,
-                    'invoice_number'=>$invoiceNumber,
-                    'invoice_book_nr'=>$invoice_book_nr,
-                    'invoice_cost_post'=>$invoice_cost_post,
-                    'invoice_description'=>$invoice_description,
-                    'invoice_row_description'=>$invoice_row_description,
-                    'invoice_follow_nr'=>$invoice_follow_nr,
-                    'submission_type'=>'groep',
-                    'submission_date'=>$submission_dateDb,
-                    'invoice_expiration_days'=>$invoice_expiration_days,
-                    'expiration_date'=>$expiration_dateDb,
-                    'organization'=>$organization,
-                    'invoice_firstname'=>$invoice_firstname,
-                    'invoice_lastname'=>$invoice_lastname,
-                    'invoice_adress'=>$invoice_adress,
-                    'invoice_zipcode'=>$invoice_zipcode,
-                    'invoice_city'=>$invoice_city,
-                    'invoice_event_nr'=>$invoice_event_nr,
-                    'price'=>$totalPrice,
-                    'invoice_btw_type'=>$invoice_btw_type_nr,
-                    'tax'=>$btw,
-                    'price_tax'=>$totalPriceBtw,
-                    'invoice_email'=>$invoice_email,
-                    'invoice_extra_information'=>$invoice_extra_information,
-                    'parking_tickets'=>$numberParkingTickets,
-                    //'reduction_code'=>$kortingsCode,
-                    'notes'=>$notes
+                    'invoice_id'=>$submissionId,
+                    'name'=>$part['Naam'],
+                    'email'=>$part['E-mailadres'] 
                 )
             );
-            
-            $submissionId = $wpdb->get_var("SELECT id FROM word1_submissions WHERE submission_id = '$submission_id'");
-
-            foreach ($participants as $part) {
-                $wpdb->insert('word1_submission_participants',
-                    array(
-                        'invoice_id'=>$submissionId,
-                        'name'=>$part['Naam'],
-                        'email'=>$part['E-mailadres'] 
-                    )
-                );
-            }
         }
+
+        // First payment detail: insert the entree payment detail row (with btw high)
+        $wpdb->insert('word1_submission_payment_details',
+            array(
+                'invoice_id'=>$submissionId,
+                'event'=>$payment_detail_event_nr_high_btw,
+                'price'=>$total_price_highbtw,
+                'btw_type'=>$btw_high_nr,
+                'tax'=>$total_btw_high,
+                'row_description'=>$payment_detail_description_high_btw,
+                'price_tax'=>$total_price_highbtw_total,
+                'invoice_number'=>$invoiceNumber
+            )
+        );
+        
+        // Second payment detail: insert the food payment detail row (with btw low)
+        $wpdb->insert('word1_submission_payment_details',
+            array(
+                'invoice_id'=>$submissionId,    
+                'event'=>$payment_detail_event_nr_low_btw,
+                'price'=>$food_costs,
+                'btw_type'=>$btw_low_nr,
+                'tax'=>$food_costs_btw,
+                'row_description'=>$payment_detail_description_low_btw,
+                'price_tax'=>$total_price_low,
+                'invoice_number'=>$invoiceNumber
+            )
+        );
+    }
 ?>
 
 <div class="container">
@@ -571,20 +634,27 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
                 <th>Totaalbedrag</th>
             </tr>
             <tr>
-                <td>Deelname Het Grootste Kennisfestival
+                <td>Deelname Het Grootste Kennisfestival 2017
                 </td>
                 <td align="right"><?php echo number_format(count($participants), 2, ',', ''); ?></td>
-                <td align="right">€ 175,00</td>
+                <td align="right">€ <?php echo number_format($participant_price, 2, ',', ''); ?></td>
                 <td align="right">21 %</td>
-                <td align="right">€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($participants_costs, 2, ',', ''); ?></td>
+            </tr>
+            <tr>
+                <td>Lekker eten en drinken                </td>
+                <td align="right"><?php echo number_format(count($participants), 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($food_price, 2, ',', ''); ?></td>
+                <td align="right">6 %</td>
+                <td align="right">€ <?php echo number_format($food_costs, 2, ',', ''); ?></td>
             </tr>
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
                 <td>Parkeerticket</td>
-                <td align="right"><?php echo number_format($numberParkingTickets, 2, ',', ''); ?></td>
+                <td align="right"><?php echo number_format($number_parking_tickets, 2, ',', ''); ?></td>
                 <td align="right">€ 10,00</td>
                 <td align="right">21 %</td>
-                <td align="right">€ <?php echo number_format($parkingCosts, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo number_format($parking_costs, 2, ',', ''); ?></td>
             </tr>
             [/gravityforms]
         </table>
@@ -594,30 +664,19 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
         <table>
             <tr>
                 <td>Totaal exclusief BTW</td>
-                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <td align="right">€ <?php echo number_format($totalPrice, 2, ',', ''); ?></td>
-                    [/gravityforms]
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <td align="right">€ <?php echo number_format($participantsPrice, 2, ',', ''); ?></td>
-                [/gravityforms]
+                <td align="right">€ <?php echo number_format($total_price, 2, ',', ''); ?></td>
             </tr>
             <tr>
                 <td>BTW 21%</td>
-                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <td align="right">€ <?php echo number_format($btwWithPartkingTicket, 2, ',', ''); ?></td>
-                    [/gravityforms]
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <td align="right">€ <?php echo number_format($btw, 2, ',', ''); ?></td>
-                [/gravityforms]
+                <td align="right">€ <?php echo number_format($total_btw_high, 2, ',', ''); ?></td>
+            </tr>
+             <tr>
+                <td>BTW 6%</td>
+                <td align="right">€ <?php echo number_format($total_btw_low, 2, ',', ''); ?></td>
             </tr>
             <tr>
                 <th>Totaal te voldoen</th>
-                  [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
-                    <th align="right">€ <?php echo number_format($totalPriceBtw, 2, ',', ''); ?></th>
-                    [/gravityforms]
-                    [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="nee"]
-                <th align="right">€ <?php echo number_format($totalPriceWithoutParkingTicket, 2, ',', ''); ?></th>
-                [/gravityforms]
+                <th align="right">€ <?php echo number_format($total_price_btw, 2, ',', ''); ?></th>
             </tr>
 
         </table>

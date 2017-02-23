@@ -284,8 +284,10 @@ function render_edit_reduction_code_page() {
 add_action('admin_init', 'convert_to_csv');
 
 function convert_to_csv()
-{
+{ 
     if (isset($_POST['download_participants']) || isset($_POST['download_invoices'])) {
+        $downloadParticipantsFields = array('submission_type','submission_date','organization','reduction_code','notes','participant_firstname','participant_lastname','participant_email' );
+   
         $date = '2016-11-01';
         $fromDate = date('Y-m-d', strtotime($date));
 
@@ -306,7 +308,9 @@ function convert_to_csv()
 
         global $wpdb;
         foreach ($wpdb->get_col("DESC " . 'word1_submissions', 0) as $column_name) {
-            $header[] = $column_name;
+            if (isset($_POST['download_participants']) && in_array($column_name, $downloadParticipantsFields)) {
+                $header[] = $column_name;
+            }
         }
 
         if (isset($_POST['download_participants'])) {
@@ -324,8 +328,14 @@ function convert_to_csv()
 
         /* loop through array  */
         foreach ($submissions as $submission) {
-            $submissionArray = (array)$submission;
-
+            $submissionTempArray = (array)$submission;
+            $submissionArray = $submissionTempArray;
+            foreach ($submissionTempArray as $key => $value) {
+                if (!in_array($key, $downloadParticipantsFields)) {
+                    unset($submissionArray[$key]);
+                }
+            }
+            
             if (!empty($submissionArray['price'])) {
                 $submissionArray['price'] = number_format($submissionArray['price'], 2, ',', '');
             }
@@ -337,7 +347,7 @@ function convert_to_csv()
             }
 
             if (isset($_POST['download_participants'])) {
-                $submissionId = $submissionArray['id'];
+                $submissionId = $submissionTempArray['id'];
 
                 $submissionsOParticipants = $wpdb->get_results("SELECT * FROM word1_submission_participants where invoice_id = " . $submissionId);
 

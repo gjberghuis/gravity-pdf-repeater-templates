@@ -287,6 +287,7 @@ function convert_to_csv()
 { 
     if (isset($_POST['download_participants']) || isset($_POST['download_invoices'])) {
         $downloadParticipantsFields = array('submission_type','submission_date','organization','reduction_code','notes','participant_firstname','participant_lastname','participant_email' );
+        $downloadInvoicesFields = array('submission_id','invoice_debiteur_nr','invoice_book_nr','invoice_cost_post','invoice_description','invoice_follow_nr','submission_type','submission_date','invoice_expiration_days','expiration_days','timestamp','organization','invoice_first_name','invoice_last_name','invoice_adress','invoice_zipcode','invoice_city','invoice_email','invoice_extra_information','parking_tickets','reduction_code','invoice_reduction_code','notes');
    
         $date = '2016-11-01';
         $fromDate = date('Y-m-d', strtotime($date));
@@ -310,13 +311,22 @@ function convert_to_csv()
         foreach ($wpdb->get_col("DESC " . 'word1_submissions', 0) as $column_name) {
             if (isset($_POST['download_participants']) && in_array($column_name, $downloadParticipantsFields)) {
                 $header[] = $column_name;
-            }
+            } elseif (isset($_POST['download_invoices']) && in_array($column_name, $downloadInvoicesFields)) {
+                $header[] = $column_name;
+            } 
         }
 
         if (isset($_POST['download_participants'])) {
             $header[] = "participant_firstname";
             $header[] = "participant_lastname";
             $header[] = "participant_email";
+        } elseif (isset($_POST['download_invoices'])) {
+            $header[] = "payment_event";
+            $header[] = "payment_row_description";
+            $header[] = "payment_price";
+            $header[] = "payment_btw_type";
+            $header[] = "payment_tax";
+            $header[] = "payment_price_tax";
         }
 
         $f = fopen('php://output', 'w');
@@ -331,7 +341,9 @@ function convert_to_csv()
             $submissionTempArray = (array)$submission;
             $submissionArray = $submissionTempArray;
             foreach ($submissionTempArray as $key => $value) {
-                if (!in_array($key, $downloadParticipantsFields)) {
+                if (isset($_POST['download_participants']) && !in_array($key, $downloadParticipantsFields)) {
+                    unset($submissionArray[$key]);
+                } elseif (isset($_POST['download_invoices']) && !in_array($key, $downloadInvoicesFields)) {
                     unset($submissionArray[$key]);
                 }
             }
@@ -373,6 +385,18 @@ function convert_to_csv()
 
                     /** default php csv handler **/
                     fputcsv($f, $lineArray, ';');
+                }
+            } elseif (isset($_POST['download_invoices'])) {
+                $submissionId = $submissionTempArray['id'];
+
+                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event,  row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax, price_tax as payment_price_tax FROM word1_submission_payment_details where invoice_id = " . $submissionId);
+                
+                foreach ($submissionPaymentDetails as $paymentDetail) {
+                    $paymentArray = (array)$paymentDetail;
+                    
+                    $lineArray = $submissionArray;
+                    $csvArray = array_merge($lineArray, $paymentArray);
+                    fputcsv($f, $csvArray, ';');
                 }
             } else {
                 fputcsv($f, $submissionArray, ';');

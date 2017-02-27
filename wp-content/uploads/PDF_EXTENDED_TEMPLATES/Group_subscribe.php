@@ -450,8 +450,18 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     $total_price_highbtw_total = $total_price_highbtw + $total_price_highbtw_btw;
 
     $total_price = $parking_costs + $food_costs + $participants_costs;
+   
+
+    $rounded_total_price = number_format($total_price * 100, 0, ',', '');
+    $rounded_btw_part_low = number_format($total_btw_low * 100, 0, ',', '');
+    $rounded_btw_part_high = number_format($total_btw_high * 100, 0, ',', '');
+
     $total_btw = $total_btw_high + $total_btw_low;
-    $total_price_btw = $total_price + $total_btw;
+
+    $total_price_btw = ($rounded_total_price) + ($rounded_btw_part_low) + ($rounded_btw_part_high);
+    $total_price_btw = $total_price_btw / 100; 
+        
+
 
     // Extra payment detail for exact
     $payment_detail_description_low_btw = 'Vertering Het Grootste Kennisfestival';

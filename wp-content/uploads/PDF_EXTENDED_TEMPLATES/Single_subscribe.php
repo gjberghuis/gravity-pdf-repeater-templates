@@ -429,8 +429,14 @@ div.participantsInfo ul {
         $payment_detail_event_nr_high_btw = '8000';
 
         $total_btw = $total_price * 0.21;
-        $total_price_btw = $total_price + $btw_part_low_btw + $btw_part_high_btw;
 
+        $rounded_total_price = number_format($total_price * 100, 0, ',', '');
+        $rounded_btw_part_low = number_format($btw_part_low_btw * 100, 0, ',', '');
+        $rounded_btw_part_high = number_format($btw_part_high_btw * 100, 0, ',', '');
+
+        $total_price_btw = ($rounded_total_price) + ($rounded_btw_part_low) + ($rounded_btw_part_high);
+        $total_price_btw = $total_price_btw / 100; 
+        
         // Create invoice number
         global $wpdb;
         $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");

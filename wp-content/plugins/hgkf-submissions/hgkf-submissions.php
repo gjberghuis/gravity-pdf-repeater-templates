@@ -74,8 +74,11 @@ function render_submissions_overview_page()
             echo '<td style="padding:20px;">';
             echo '<input type="submit" value="Download deelnemers in csv" name="download_participants" />';
             echo '</td>';
-            echo '<td>';
+            echo '<td style="padding:20px;">';
             echo '<input type="submit" value="Download facturen in csv" name="download_invoices" />';
+            echo '</td>';
+            echo '<td style="padding:20px;">';
+            echo '<input type="submit" value="Download facturen in csv (versie 2)" name="download_invoices_new" />';
             echo '</td>';
             echo '</tr>';
         echo '</table>';
@@ -285,7 +288,7 @@ add_action('admin_init', 'convert_to_csv');
 
 function convert_to_csv()
 { 
-    if (isset($_POST['download_participants']) || isset($_POST['download_invoices'])) {
+    if (isset($_POST['download_participants']) || isset($_POST['download_invoices']) || isset($_POST['download_invoices_new'])) {
         $downloadParticipantsFields = array('submission_type','submission_date','organization','reduction_code','notes','participant_firstname','participant_lastname','participant_email' );
         $downloadInvoicesFields = array('submission_id','invoice_debiteur_nr','invoice_book_nr','invoice_cost_post','invoice_description','invoice_follow_nr','submission_type','submission_date','invoice_expiration_days','expiration_days','timestamp','organization','invoice_first_name','invoice_last_name','invoice_adress','invoice_zipcode','invoice_city','invoice_email','invoice_extra_information','parking_tickets','reduction_code','invoice_reduction_code','notes');
    
@@ -311,16 +314,18 @@ function convert_to_csv()
         foreach ($wpdb->get_col("DESC " . 'word1_submissions', 0) as $column_name) {
             if (isset($_POST['download_participants']) && in_array($column_name, $downloadParticipantsFields)) {
                 $header[] = $column_name;
-            } elseif (isset($_POST['download_invoices']) && in_array($column_name, $downloadInvoicesFields)) {
+            } elseif (isset($_POST['download_invoices_new']) && in_array($column_name, $downloadInvoicesFields)) {
                 $header[] = $column_name;
-            } 
+            } elseif (isset($_POST['download_invoices'])) {
+                $header[] = $column_name;
+            }
         }
 
         if (isset($_POST['download_participants'])) {
             $header[] = "participant_firstname";
             $header[] = "participant_lastname";
             $header[] = "participant_email";
-        } elseif (isset($_POST['download_invoices'])) {
+        } elseif (isset($_POST['download_invoices_new'])) {
             $header[] = "payment_event";
             $header[] = "payment_row_description";
             $header[] = "payment_price";
@@ -343,7 +348,7 @@ function convert_to_csv()
             foreach ($submissionTempArray as $key => $value) {
                 if (isset($_POST['download_participants']) && !in_array($key, $downloadParticipantsFields)) {
                     unset($submissionArray[$key]);
-                } elseif (isset($_POST['download_invoices']) && !in_array($key, $downloadInvoicesFields)) {
+                } elseif (isset($_POST['download_invoices_new']) && !in_array($key, $downloadInvoicesFields)) {
                     unset($submissionArray[$key]);
                 }
             }
@@ -386,7 +391,7 @@ function convert_to_csv()
                     /** default php csv handler **/
                     fputcsv($f, $lineArray, ';');
                 }
-            } elseif (isset($_POST['download_invoices'])) {
+            } elseif (isset($_POST['download_invoices_new'])) {
                 $submissionId = $submissionTempArray['id'];
 
                 $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event,  row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax, price_tax as payment_price_tax FROM word1_submission_payment_details where invoice_id = " . $submissionId);

@@ -259,7 +259,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     div.price {
         width: 100%;
         float: left;
-        margin-top: 60px;    
+        margin-top: 20px;    
     }
 
     body {
@@ -307,7 +307,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
   
 
     div.payment-notification {
-        margin-top: 100px;
+        margin-top: 60px;
         margin-bottom: 60px;
     }
 
@@ -317,7 +317,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     }
 
     div.info {
-        margin-top: 40px;
+        margin-top: 0px;
         width: 90%;
         position:absolute;
         bottom: 0;
@@ -435,10 +435,10 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
     $food_costs_btw = $food_costs * $btw_low;
     
     // Participants
-    $participant_price = 175;
-    $participants_costs = (count($participants) * $participant_price) - $food_costs; 
+    $participant_price = 175 - $food_price;
+    $participants_costs = (count($participants) * $participant_price); 
     $participants_costs_btw = $participants_costs * $btw_high;
-    $participants_costs_without_food = $particpants_costs - $food_costs;
+    $participants_costs_without_food = $particpants_costs;
 
     // Totals    
     $total_btw_high = $participants_costs_btw + $parking_costs_btw;

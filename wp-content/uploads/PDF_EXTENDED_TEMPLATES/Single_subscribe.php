@@ -287,7 +287,7 @@ div.total-price {
 
 div.total-price table {
     width: 100%;
-    margin-top: 80px;
+    margin-top: 40px;
 }
 
  table th, table td{
@@ -308,7 +308,7 @@ div.total-price table {
     }
 
 div.payment-notification {
-    margin-top: 100px;
+    margin-top: 60px;
     margin-bottom: 60px;
 }
 

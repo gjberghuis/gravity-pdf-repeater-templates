@@ -290,7 +290,7 @@ function convert_to_csv()
 { 
     if (isset($_POST['download_participants']) || isset($_POST['download_invoices']) || isset($_POST['download_invoices_new'])) {
         $downloadParticipantsFields = array('submission_type','submission_date','organization','reduction_code','notes','participant_firstname','participant_lastname','participant_email' );
-        $downloadInvoicesFields = array('submission_id','invoice_debiteur_nr','invoice_book_nr','invoice_cost_post','invoice_description','invoice_follow_nr','submission_type','submission_date','invoice_expiration_days','expiration_days','timestamp','organization','invoice_first_name','invoice_last_name','invoice_adress','invoice_zipcode','invoice_city','invoice_email','invoice_extra_information','parking_tickets','reduction_code','invoice_reduction_code','notes');
+        $downloadInvoicesFields = array('submission_id','invoice_debiteur_nr','invoice_book_nr','invoice_cost_post','invoice_description','invoice_follow_nr','submission_type','submission_date','invoice_expiration_days','expiration_days','timestamp','organization','invoice_firstname','invoice_lastname','invoice_adress','invoice_zipcode','invoice_city','invoice_email','invoice_extra_information','parking_tickets','reduction_code','invoice_reduction_code','notes');
    
         $date = '2016-11-01';
         $fromDate = date('Y-m-d', strtotime($date));
@@ -331,7 +331,6 @@ function convert_to_csv()
             $header[] = "payment_price";
             $header[] = "payment_btw_type";
             $header[] = "payment_tax";
-            $header[] = "payment_price_tax";
         }
 
         $f = fopen('php://output', 'w');
@@ -394,7 +393,7 @@ function convert_to_csv()
             } elseif (isset($_POST['download_invoices_new'])) {
                 $submissionId = $submissionTempArray['id'];
 
-                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event,  row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax, price_tax as payment_price_tax FROM word1_submission_payment_details where invoice_id = " . $submissionId);
+                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event,  row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax FROM word1_submission_payment_details where invoice_id = " . $submissionId);
                 
                 foreach ($submissionPaymentDetails as $paymentDetail) {
                     $paymentArray = (array)$paymentDetail;

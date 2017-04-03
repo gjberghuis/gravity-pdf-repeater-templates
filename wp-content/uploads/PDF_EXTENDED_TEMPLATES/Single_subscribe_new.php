@@ -204,10 +204,10 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     div.container {
         width: 90%;
-        margin: 0 auto;    
+        margin: 0 auto;
     }
 
-  div.logo {
+    div.logo {
         float:right;
         height: 200px;
         width: 20%;
@@ -220,8 +220,8 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     div.naw {
         float:left;
-      margin-top: 120px;
-      width: 40%;
+        margin-top: 120px;
+        width: 40%;
     }
 
     ul {
@@ -230,7 +230,7 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     h1 {
         margin-top: 60px;
-    } 
+    }
 
     div.general {
         width: 100%;
@@ -258,294 +258,294 @@ $value_border_colour = ( ! empty( $settings['zadani_border_colour'] ) ) ? $setti
 
     div.price {
         width: 100%;
-        margin-top: 60px;    
+        margin-top: 60px;
     }
 
-body {
-      font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-}
+    body {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    }
 
-table {
-    width: 100%;
-    
-    border-collapse: collapse;
-}
+    table {
+        width: 100%;
 
-table td {
-    vertical-align: top;
-}
+        border-collapse: collapse;
+    }
 
-div.price-info {
-    width: 100%;
-    display:inline-block;
-}
+    table td {
+        vertical-align: top;
+    }
 
-div.total-price { 
-    width: 40%;
-    float:right;
-}
+    div.price-info {
+        width: 100%;
+        display:inline-block;
+    }
 
-div.total-price table {
-    width: 100%;
-    margin-top: 40px;
-}
+    div.total-price {
+        width: 40%;
+        float:right;
+    }
 
- table th, table td{
-     border: 1px solid #ddd;
-    padding: 8px;
-}
+    div.total-price table {
+        width: 100%;
+        margin-top: 40px;
+    }
 
-  table tr th { 
+    table th, table td{
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    table tr th {
         text-align:left;
-           background-color: #ede8c4;
-    color: black;
-      padding-top: 12px;
-    padding-bottom: 12px;
+        background-color: #ede8c4;
+        color: black;
+        padding-top: 12px;
+        padding-bottom: 12px;
     }
 
- table tr th.description { 
+    table tr th.description {
         width: 50%;
     }
 
-div.payment-notification {
-    margin-top: 60px;
-    margin-bottom: 60px;
-}
+    div.payment-notification {
+        margin-top: 60px;
+        margin-bottom: 60px;
+    }
 
-div.payment-notification p {
-    display:block;
-    margin-top: 40px;
-}
+    div.payment-notification p {
+        display:block;
+        margin-top: 40px;
+    }
 
-div.info {
-    width: 90%;
-    bottom: 0;
-}
+    div.info {
+        width: 90%;
+        bottom: 0;
+    }
 
-div.info-part{
-    width: 33%;
-    float: left;
-}
+    div.info-part{
+        width: 33%;
+        float: left;
+    }
 
-div.info-part-middle{
-    width: 33%;
-    float: left;
-}
+    div.info-part-middle{
+        width: 33%;
+        float: left;
+    }
 
-div.info-part-middle ul{
-display:table;
-margin:auto;
-}
+    div.info-part-middle ul{
+        display:table;
+        margin:auto;
+    }
 
-div.info-part-last{
-    width: 33%;
-    float: right;
-}
+    div.info-part-last{
+        width: 33%;
+        float: right;
+    }
 
-div.info-part-last ul{
-    float: right;
-}
+    div.info-part-last ul{
+        float: right;
+    }
 
-table.people {
-    margin-top:20px;
-    margin-left:20px;
-    padding-top:20px;
-}   
-table.people ul {
-    list-style-type:none;
-}
+    table.people {
+        margin-top:20px;
+        margin-left:20px;
+        padding-top:20px;
+    }
+    table.people ul {
+        list-style-type:none;
+    }
 
-div.participantsInfo ul {
-    padding:0;
-}
+    div.participantsInfo ul {
+        padding:0;
+    }
 
 </style>
 
- <?php
-        // Calculate price of a ticket
-        $totalPriceTicket = 195;
-        $kortingsCode = '';
-        if (!empty($entry[21])) {
-            $kortingsCode = strtolower(trim($entry[21]));
-        }
+<?php
+// Calculate price of a ticket
+$totalPriceTicket = 195;
+$kortingsCode = '';
+if (!empty($entry[21])) {
+    $kortingsCode = strtolower(trim($entry[21]));
+}
 
-        global $wpdb;
+global $wpdb;
 
-        $sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes where code = '" . $kortingsCode . "'";
+$sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes where code = '" . $kortingsCode . "'";
 
-        $result = $wpdb->get_results($sql, 'ARRAY_A');
+$result = $wpdb->get_results($sql, 'ARRAY_A');
 
-        if (count($result) > 0) {
-            $totalPriceTicket = $result[0]['ticket_price'];
-        }
+if (count($result) > 0) {
+    $totalPriceTicket = $result[0]['ticket_price'];
+}
 
-        // Add parking ticket costs to the ticket
-        $parkingTicket = 10;
-        $numberParkingTickets = 0;
-        $total_price = $totalPriceTicket;
-        if (!empty($entry[22]) && $entry[22] == 'Ja') {
-            $total_price += $parkingTicket;
-            $numberParkingTickets = 1;
-        }
-        
-        // Calculate the btw
-        $btw_low_nr = '1';
-        $btw_low = 0.06;
-        $btw_high_nr = '2';
-        $btw_high = 0.21;
-        $food_price = 19.25;
+// Add parking ticket costs to the ticket
+$parkingTicket = 10;
+$numberParkingTickets = 0;
+$total_price = $totalPriceTicket;
+if (!empty($entry[22]) && $entry[22] == 'Ja') {
+    $total_price += $parkingTicket;
+    $numberParkingTickets = 1;
+}
 
-        // Calculate high btw First substract the food (low btw) and split into parking ticket and ticket
-        if ($numberParkingTickets > 0) {
-            $price_part_high_parkingticket = ($numberParkingTickets * $parkingTicket);
-            $price_part_high_btw_parkingticket = $price_part_high_parkingticket * $btw_high;
-            $total_price_part_high_btw_parkingticket = $price_part_high_parkingticket + $price_part_high_btw_parkingticket;
+// Calculate the btw
+$btw_low_nr = '1';
+$btw_low = 0.06;
+$btw_high_nr = '2';
+$btw_high = 0.21;
+$food_price = 19.25;
 
-            $price_part_high_ticket = ($total_price - $food_price - ($numberParkingTickets * $parkingTicket));
-            $price_part_high_btw = $price_part_high_ticket + $price_part_high_parkingticket;
-            $price_part_high_btw_ticket = $price_part_high_ticket * $btw_high;
-            $total_price_part_high_btw_ticket = $price_part_high_ticket + $price_part_high_btw_ticket;
+// Calculate high btw First substract the food (low btw) and split into parking ticket and ticket
+if ($numberParkingTickets > 0) {
+    $price_part_high_parkingticket = ($numberParkingTickets * $parkingTicket);
+    $price_part_high_btw_parkingticket = $price_part_high_parkingticket * $btw_high;
+    $total_price_part_high_btw_parkingticket = $price_part_high_parkingticket + $price_part_high_btw_parkingticket;
 
-            $btw_part_high_btw = $price_part_high_btw_parkingticket + $price_part_high_btw_ticket;
-        } else {
-            $price_part_high_ticket = $total_price - $food_price;  
-            $price_part_high_btw = $price_part_high_ticket;
-            $price_part_high_btw_ticket = $price_part_high_ticket * $btw_high;
-            $total_price_part_high_btw_ticket = $price_part_high_ticket + $price_part_high_btw_ticket;
+    $price_part_high_ticket = ($total_price - $food_price - ($numberParkingTickets * $parkingTicket));
+    $price_part_high_btw = $price_part_high_ticket + $price_part_high_parkingticket;
+    $price_part_high_btw_ticket = $price_part_high_ticket * $btw_high;
+    $total_price_part_high_btw_ticket = $price_part_high_ticket + $price_part_high_btw_ticket;
 
-            $btw_part_high_btw = $price_part_high_btw_ticket;
-        }
+    $btw_part_high_btw = $price_part_high_btw_parkingticket + $price_part_high_btw_ticket;
+} else {
+    $price_part_high_ticket = $total_price - $food_price;
+    $price_part_high_btw = $price_part_high_ticket;
+    $price_part_high_btw_ticket = $price_part_high_ticket * $btw_high;
+    $total_price_part_high_btw_ticket = $price_part_high_ticket + $price_part_high_btw_ticket;
 
-        $total_price_part_high_btw = $price_part_high_btw + $btw_part_high_btw;
+    $btw_part_high_btw = $price_part_high_btw_ticket;
+}
 
-        // Calculate low btw
-        $btw_part_low_btw = $food_price * $btw_low;
-        $total_price_part_low_btw = $food_price + $btw_part_low_btw;
+$total_price_part_high_btw = $price_part_high_btw + $btw_part_high_btw;
 
-        // Payment details
-        $payment_detail_description_low_btw = 'Vertering Het Grootste Kennisfestival';
-        $payment_detail_description_high_btw = 'Deelname Het Grootste Kennisfestival';
-        $payment_detail_event_nr_low_btw = '8030';
-        $payment_detail_event_nr_high_btw = '8000';
+// Calculate low btw
+$btw_part_low_btw = $food_price * $btw_low;
+$total_price_part_low_btw = $food_price + $btw_part_low_btw;
 
-        $total_btw = $total_price * 0.21;
+// Payment details
+$payment_detail_description_low_btw = 'Vertering Het Grootste Kennisfestival';
+$payment_detail_description_high_btw = 'Deelname Het Grootste Kennisfestival';
+$payment_detail_event_nr_low_btw = '8030';
+$payment_detail_event_nr_high_btw = '8000';
 
-        $rounded_total_price = number_format($total_price * 100, 0, ',', '');
-        $rounded_btw_part_low = number_format($btw_part_low_btw * 100, 0, ',', '');
-        $rounded_btw_part_high = number_format($btw_part_high_btw * 100, 0, ',', '');
+$total_btw = $total_price * 0.21;
 
-        $total_price_btw = ($rounded_total_price) + ($rounded_btw_part_low) + ($rounded_btw_part_high);
-        $total_price_btw = $total_price_btw / 100; 
-        
-        // Create invoice number
-        global $wpdb;
-        $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
+$rounded_total_price = number_format($total_price * 100, 0, ',', '');
+$rounded_btw_part_low = number_format($btw_part_low_btw * 100, 0, ',', '');
+$rounded_btw_part_high = number_format($btw_part_high_btw * 100, 0, ',', '');
 
-        $invoiceCount = $count + 1;
-        $invoice_deb_nr = $invoiceCount + 12000;
-        $invoice_book_nr = '71';
-        $invoice_cost_post = 'HGKF';
-        $invoice_description = 'Deelname Het Grootste Kennisfestival';
-        $invoice_row_description = 'Deelname Het Grootste Kennisfestival';
-        $invoice_follow_nr = '2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT); 
-        $invoiceNumber = $invoice_cost_post . $invoice_follow_nr;   
+$total_price_btw = ($rounded_total_price) + ($rounded_btw_part_low) + ($rounded_btw_part_high);
+$total_price_btw = $total_price_btw / 100;
 
-        $submission_id = $entry['id'];
-        $submission_date = date("d-m-Y");
-        $submission_dateDb = date("Y-m-d H:i:s");
-        $invoice_expiration_days = '14';
-        $expiration_date = date('d-m-Y', strtotime("+14 days"));
-        $expiration_dateDb = date('Y-m-d H:i:s', strtotime("+14 days"));
+// Create invoice number
+global $wpdb;
+$count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
 
-        $organization = $entry['16'];
-        $invoice_firstname = $entry['17.3'];
-        $invoice_lastname = $entry['17.6'];
-        $invoice_adress = $entry['18.1'];
-        $invoice_zipcode = $entry['18.3'];
-        $invoice_city = $entry['18.5'];
-        $invoice_email = $entry['19'];
-        $invoice_extra_information = $entry['20'];
-        $invoice_event_nr = '8000';
-        $invoice_btw_type_nr = '2';
-        $notes = $entry['23'];
-        $participant_firstname = $entry['15.3'];
-        $participant_lastname = $entry['15.6'];
-        $participant_email = $entry['13'];
+$invoiceCount = $count + 1;
+$invoice_deb_nr = $invoiceCount + 12000;
+$invoice_book_nr = '71';
+$invoice_cost_post = 'HGKF';
+$invoice_description = 'Deelname Het Grootste Kennisfestival';
+$invoice_row_description = 'Deelname Het Grootste Kennisfestival';
+$invoice_follow_nr = '2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT);
+$invoiceNumber = $invoice_cost_post . $invoice_follow_nr;
 
-        global $wpdb;
-        $exists = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions WHERE submission_id = '$submission_id'");
-        
-        if ($exists < 1) {
-            $wpdb->insert('word1_submissions',
-                array(
-                    'submission_id'=>$submission_id,
-                    'invoice_debiteur_nr'=>$invoice_deb_nr,
-                    'invoice_number'=>$invoiceNumber,
-                    'invoice_book_nr'=>$invoice_book_nr,
-                    'invoice_cost_post'=>$invoice_cost_post,
-                    'invoice_description'=>$invoice_description,
-                    'invoice_row_description'=>$invoice_row_description,
-                    'invoice_follow_nr'=>$invoice_follow_nr,
-                    'submission_type'=>'individu',
-                    'submission_date'=>$submission_dateDb,
-                    'invoice_expiration_days'=>$invoice_expiration_days,
-                    'expiration_date'=>$expiration_dateDb,
-                    'organization'=>$organization,
-                    'invoice_firstname'=>$invoice_firstname,
-                    'invoice_lastname'=>$invoice_lastname,
-                    'invoice_adress'=>$invoice_adress,
-                    'invoice_zipcode'=>$invoice_zipcode,
-                    'invoice_city'=>$invoice_city,
-                    'invoice_event_nr'=>$invoice_event_nr,
-                    'price'=>$total_price,
-                    'invoice_btw_type'=>$invoice_btw_type_nr,
-                    'tax'=>$total_btw,
-                    'price_tax'=>$total_price_btw,
-                    'invoice_email'=>$invoice_email,
-                    'invoice_extra_information'=>$invoice_extra_information,
-                    'parking_tickets'=>$numberParkingTickets,
-                    'reduction_code'=>$kortingsCode,
-                    'notes'=>$notes
-                )
-            );
-            
-            $submissionId = $wpdb->get_var("SELECT id FROM word1_submissions WHERE submission_id = '$submission_id'");
-            $wpdb->insert('word1_submission_participants',
-                array(
-                    'invoice_id'=>$submissionId,
-                    'name'=>$participant_firstname . ' ' . $participant_lastname,
-                    'email'=>$participant_email
-                )
-            );
+$submission_id = $entry['id'];
+$submission_date = date("d-m-Y");
+$submission_dateDb = date("Y-m-d H:i:s");
+$invoice_expiration_days = '14';
+$expiration_date = date('d-m-Y', strtotime("+14 days"));
+$expiration_dateDb = date('Y-m-d H:i:s', strtotime("+14 days"));
 
-            // First payment detail: insert the entree payment detail row (with btw high)
-            $wpdb->insert('word1_submission_payment_details',
-                array(
-                    'invoice_id'=>$submissionId,
-                    'event'=>$payment_detail_event_nr_high_btw,
-                    'price'=>$price_part_high_btw,
-                    'btw_type'=>$btw_high_nr,
-                    'tax'=>$btw_part_high_btw,
-                    'row_description'=>$payment_detail_description_high_btw,
-                    'price_tax'=>$total_price_part_high_btw,
-                    'invoice_number'=>$invoiceNumber
-                )
-            );
-            
-            // Second payment detail: insert the food payment detail row (with btw low)
-            $wpdb->insert('word1_submission_payment_details',
-                array(
-                    'invoice_id'=>$submissionId,    
-                    'event'=>$payment_detail_event_nr_low_btw,
-                    'price'=>$food_price,
-                    'btw_type'=>$btw_low_nr,
-                    'tax'=>$btw_part_low_btw,
-                    'row_description'=>$payment_detail_description_low_btw,
-                    'price_tax'=>$total_price_part_low_btw,
-                    'invoice_number'=>$invoiceNumber
-                )
-            );
-        }
+$organization = $entry['16'];
+$invoice_firstname = $entry['17.3'];
+$invoice_lastname = $entry['17.6'];
+$invoice_adress = $entry['18.1'];
+$invoice_zipcode = $entry['18.3'];
+$invoice_city = $entry['18.5'];
+$invoice_email = $entry['19'];
+$invoice_extra_information = $entry['20'];
+$invoice_event_nr = '8000';
+$invoice_btw_type_nr = '2';
+$notes = $entry['23'];
+$participant_firstname = $entry['15.3'];
+$participant_lastname = $entry['15.6'];
+$participant_email = $entry['13'];
+
+global $wpdb;
+$exists = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions WHERE submission_id = '$submission_id'");
+
+if ($exists < 1) {
+    $wpdb->insert('word1_submissions',
+        array(
+            'submission_id'=>$submission_id,
+            'invoice_debiteur_nr'=>$invoice_deb_nr,
+            'invoice_number'=>$invoiceNumber,
+            'invoice_book_nr'=>$invoice_book_nr,
+            'invoice_cost_post'=>$invoice_cost_post,
+            'invoice_description'=>$invoice_description,
+            'invoice_row_description'=>$invoice_row_description,
+            'invoice_follow_nr'=>$invoice_follow_nr,
+            'submission_type'=>'individu',
+            'submission_date'=>$submission_dateDb,
+            'invoice_expiration_days'=>$invoice_expiration_days,
+            'expiration_date'=>$expiration_dateDb,
+            'organization'=>$organization,
+            'invoice_firstname'=>$invoice_firstname,
+            'invoice_lastname'=>$invoice_lastname,
+            'invoice_adress'=>$invoice_adress,
+            'invoice_zipcode'=>$invoice_zipcode,
+            'invoice_city'=>$invoice_city,
+            'invoice_event_nr'=>$invoice_event_nr,
+            'price'=>$total_price,
+            'invoice_btw_type'=>$invoice_btw_type_nr,
+            'tax'=>$total_btw,
+            'price_tax'=>$total_price_btw,
+            'invoice_email'=>$invoice_email,
+            'invoice_extra_information'=>$invoice_extra_information,
+            'parking_tickets'=>$numberParkingTickets,
+            'reduction_code'=>$kortingsCode,
+            'notes'=>$notes
+        )
+    );
+
+    $submissionId = $wpdb->get_var("SELECT id FROM word1_submissions WHERE submission_id = '$submission_id'");
+    $wpdb->insert('word1_submission_participants',
+        array(
+            'invoice_id'=>$submissionId,
+            'name'=>$participant_firstname . ' ' . $participant_lastname,
+            'email'=>$participant_email
+        )
+    );
+
+    // First payment detail: insert the entree payment detail row (with btw high)
+    $wpdb->insert('word1_submission_payment_details',
+        array(
+            'invoice_id'=>$submissionId,
+            'event'=>$payment_detail_event_nr_high_btw,
+            'price'=>$price_part_high_btw,
+            'btw_type'=>$btw_high_nr,
+            'tax'=>$btw_part_high_btw,
+            'row_description'=>$payment_detail_description_high_btw,
+            'price_tax'=>$total_price_part_high_btw,
+            'invoice_number'=>$invoiceNumber
+        )
+    );
+
+    // Second payment detail: insert the food payment detail row (with btw low)
+    $wpdb->insert('word1_submission_payment_details',
+        array(
+            'invoice_id'=>$submissionId,
+            'event'=>$payment_detail_event_nr_low_btw,
+            'price'=>$food_price,
+            'btw_type'=>$btw_low_nr,
+            'tax'=>$btw_part_low_btw,
+            'row_description'=>$payment_detail_description_low_btw,
+            'price_tax'=>$total_price_part_low_btw,
+            'invoice_number'=>$invoiceNumber
+        )
+    );
+}
 ?>
 
 <div class="container">
@@ -562,7 +562,7 @@ div.participantsInfo ul {
                 <li>{Adres (Straat + huisnummer):18.1}</li>
                 <li>{Adres (Postcode):18.3} {Adres (Plaats):18.5}</li>
                 <li>{Adres (Land):18.6}</li>
-            </ul>   
+            </ul>
         </div>
     </div>
 
@@ -574,15 +574,15 @@ div.participantsInfo ul {
                     <div class="general-label"><b>Factuurnummer</b></div>
                     <div class="general-value"><?php echo $invoiceNumber; ?></div>
                 </li>
-              <!--  <li>
-                    <div class="general-label"><b>Debiteurnummer</b></div>
-                    <div class="general-value">453475</div>
-                </li>-->
+                <!--  <li>
+                      <div class="general-label"><b>Debiteurnummer</b></div>
+                      <div class="general-value">453475</div>
+                  </li>-->
                 <li>
                     <div class="general-label"><b>Uw referentie</b></div>
                     <div class="general-value"><?php echo $invoice_extra_information; ?></div>
                 </li>
-            </ul>    
+            </ul>
         </div>
         <div class="general-second">
             <ul>
@@ -608,7 +608,7 @@ div.participantsInfo ul {
                 <th>Totaalbedrag</th>
             </tr>
             <tr>
-                <td>Deelname Het Grootste Kennisfestival 2017       
+                <td>Deelname Het Grootste Kennisfestival 2017
                 </td>
                 <td align="right">1,00</td>
                 <td align="right">€ <?php echo number_format($price_part_high_ticket, 2, ',', ''); ?></td>
@@ -659,7 +659,7 @@ div.participantsInfo ul {
     </div>
 
     <div class="payment-notification">
-      Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben naar aanleiding van deze factuur dan kan je een mail sturen naar  administratie@regioacademy.nl. Dan nemen we zo snel mogelijk contact met je op.
+        Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben naar aanleiding van deze factuur dan kan je een mail sturen naar  administratie@regioacademy.nl. Dan nemen we zo snel mogelijk contact met je op.
     </div>
 
     <div class="info">
@@ -687,7 +687,7 @@ div.participantsInfo ul {
 
     <div class="participantsInfo">
         <h1>Deelnemer</h1>
-        <div>   
+        <div>
             <ul>
                 <li>Naam: {Naam (Voornaam):15.3} {Naam (Achternaam):15.6}</li>
                 <li>Email: {E-mailadres:13}</li>

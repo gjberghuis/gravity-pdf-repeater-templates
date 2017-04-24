@@ -402,13 +402,21 @@ div.participantsInfo ul {
             $total_price_part_high_btw_parkingticket = $price_part_high_parkingticket + $price_part_high_btw_parkingticket;
 
             $price_part_high_ticket = ($total_price - $food_price - ($numberParkingTickets * $parkingTicket));
+            // If there is a reduction price which is smaller than the food price the price part high will be below zero
+            if ($price_part_high_ticket < 0) {
+                $price_part_high_ticket = 0;
+            }
             $price_part_high_btw = $price_part_high_ticket + $price_part_high_parkingticket;
             $price_part_high_btw_ticket = $price_part_high_ticket * $btw_high;
             $total_price_part_high_btw_ticket = $price_part_high_ticket + $price_part_high_btw_ticket;
 
             $btw_part_high_btw = $price_part_high_btw_parkingticket + $price_part_high_btw_ticket;
         } else {
-            $price_part_high_ticket = $total_price - $food_price;  
+            $price_part_high_ticket = $total_price - $food_price;
+            // If there is a reduction price which is smaller than the food price the price part high will be below zero
+            if ($price_part_high_ticket < 0) {
+                $price_part_high_ticket = 0;
+            }
             $price_part_high_btw = $price_part_high_ticket;
             $price_part_high_btw_ticket = $price_part_high_ticket * $btw_high;
             $total_price_part_high_btw_ticket = $price_part_high_ticket + $price_part_high_btw_ticket;
@@ -419,6 +427,9 @@ div.participantsInfo ul {
         $total_price_part_high_btw = $price_part_high_btw + $btw_part_high_btw;
 
         // Calculate low btw
+        if ($totalPriceTicket < $food_price) {
+            $food_price = $totalPriceTicket;
+        }
         $btw_part_low_btw = $food_price * $btw_low;
         $total_price_part_low_btw = $food_price + $btw_part_low_btw;
 

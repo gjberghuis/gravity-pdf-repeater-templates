@@ -497,12 +497,12 @@ global $wpdb;
 $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
 
 $invoiceCount = $count + 1;
-$invoice_deb_nr = $invoiceCount + 16000;
+$invoice_deb_nr = $invoiceCount + 12000;
 $invoice_book_nr = '71';
-$invoice_cost_post = 'HGKF18';
+$invoice_cost_post = 'HGKF';
 $invoice_description = 'Deelname Het Grootste Kennisfestival';
 $invoice_row_description = 'Deelname Het Grootste Kennisfestival';
-$invoice_follow_nr = '2018' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT);
+$invoice_follow_nr = '2017' . str_pad($invoiceCount, 4, "0", STR_PAD_LEFT);
 $invoiceNumber = $invoice_cost_post . $invoice_follow_nr;
 
 $submission_id = $entry['id'];
@@ -667,7 +667,7 @@ if ($exists < 1) {
                 <th>Totaalbedrag</th>
             </tr>
             <tr>
-                <td>Deelname Het Grootste Kennisfestival 2018
+                <td>Deelname Het Grootste Kennisfestival 2017
                 </td>
                 <td align="right"><?php echo number_format(count($participants), 2, ',', ''); ?></td>
                 <td align="right">€ <?php echo number_format($participant_price, 2, ',', ''); ?></td>

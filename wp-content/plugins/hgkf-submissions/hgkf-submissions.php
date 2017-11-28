@@ -205,6 +205,12 @@ function render_edit_reduction_code_page() {
                     $reductionCode[0]->ticket_price = $_POST['ticket_price'];
                 }
 
+                if (!empty($_POST['free_parking_ticket'])) {
+                    $reductionCode[0]->free_parking_ticket = 1;
+                } else {
+                    $reductionCode[0]->free_parking_ticket = 0;
+                }
+
                 if (!empty($_POST['code'])) {
                     $reductionCode[0]->code = $_POST['code'];
                 }
@@ -215,6 +221,7 @@ function render_edit_reduction_code_page() {
 
                 $result = $wpdb->update('word1_submissions_reduction_codes',
                     array('ticket_price' => $reductionCode[0]->ticket_price,
+                        'free_parking_ticket' => $reductionCode[0]->free_parking_ticket,
                         'code' => $reductionCode[0]->code,
                         'description' => $reductionCode[0]->description),
                     array('id' => $reductionCode[0]->id));
@@ -243,6 +250,15 @@ function render_edit_reduction_code_page() {
             echo '</td>';
             echo '<td>';
             echo '<input type="int" name="ticket_price" value="' . $reductionCode[0]->ticket_price . '"/>';
+            echo '</td>';
+            echo '</tr>';
+            echo '<tr><td><br/></td></tr>';
+            echo '<tr>';
+            echo '<td>';
+            echo '<label for="ticket_price" style="margin-right: 20px;">Gratis parkeer ticket</label>';
+            echo '</td>';
+            echo '<td>';
+            echo '<input type="checkbox" name="free_parking_ticket"' .  ($reductionCode[0]->free_parking_ticket==1 ? 'checked' : '') . '/>';
             echo '</td>';
             echo '</tr>';
             echo '<tr><td><br/></td></tr>';

@@ -70,6 +70,8 @@ class reduction_codes extends WP_List_Table
             case 'ticket_price':
             case 'description':
                 return $item[ $column_name ];
+            case 'free_parking_ticket':
+                return $item[ $column_name ] == 1 ? 'Ja' : 'Nee';
             default:
                 return print_r($item, true); //Show the whole array for troubleshooting purposes
         }
@@ -81,6 +83,7 @@ class reduction_codes extends WP_List_Table
         $columns = array(
             'code' => __('Code', 'reductioncodes'),
             'ticket_price' => __('Ticket prijs', 'reductioncodes'),
+            'free_parking_ticket' => __('Gratis parkeerticket', 'reductioncodes'),
             'description' => __('Beschrijving', 'reductioncodes')
         );
         return $columns;
@@ -91,6 +94,7 @@ class reduction_codes extends WP_List_Table
         $sortable_columns = array(
             'code' => array('code', false),
             'ticket_price' => array('ticket_price', false),
+            'free_parking_ticket' => array('free_parking_ticket', false),
             'description' => array('description', false)
         );
         return $sortable_columns;

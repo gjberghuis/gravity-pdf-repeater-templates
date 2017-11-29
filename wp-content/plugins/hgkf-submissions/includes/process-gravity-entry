@@ -1,0 +1,188 @@
+<?php
+
+// SETTINGS
+const db_submission_table = 'word1_submissions';
+const form_id = 3;
+
+// GLOBAL FIELDS
+$dbSubmissionType;
+$dbSubmissionId;
+$dbSubmissionDate;
+$dbSubmissionOrganization;
+$dbNumberParkingTickets;
+$dbReductionCode;
+$dbNotes;
+
+/*
+* Use the gravity hook to process the data to our own tables
+*/
+add_action('gform_entry_created', 'processGravityEntryData', 10, form_id);
+function processGravityEntryData($entry, $form)
+{
+global $dbSubmissionType;
+    if (form_id === 3) {
+        // Check if the entry is already present in the database
+        global $wpdb;
+        $exists = $wpdb->get_var("SELECT COUNT(*) FROM " . db_submission_table . " WHERE submission_id = '" . $entry['id'] . "'");
+
+        if ($exists > 1) {
+            debug_to_console("Entry already exists");
+            return;
+        }
+
+        processSubmission($entry);
+        if ($dbSubmissionType === 'geen') {
+            return;
+        }
+
+      //  $newSubmission = array();
+
+       // $newSubmission = processInvoiceNAWFields($entry);
+       // $newSubmission = processInvoicePaymentFields($entry);
+       // $newSubmission = processExtraFields($entry);
+
+        //var_dump($newSubmission);
+        //die();
+    }
+}
+
+/*
+ * Process functions
+ */
+
+function processSubmission($entry)
+{
+    // Submission id
+    global $dbSubmissionId;
+    $dbSubmissionId = $entry['id'];
+
+    // Submission type
+    global $dbSubmissionType;
+
+    if ($entry['1']) {
+        if (strpos(strtolower('individuele', $entry['1'])) !== false) {
+            $dbSubmissionType = 'individu';
+        } else if (strpos('groep', strtolower($entry['1'])) !== false) {
+            $dbSubmissionType = 'groep';
+        } else {
+            $dbSubmissionType = 'geen';
+        }
+    }
+
+    global $dbSubmissionDate;
+    $dbSubmissionDate = date("Y-m-d H:i:s");
+
+    global $dbSubmissionOrganization;
+    $dbSubmissionOrganization = $entry['16'];
+
+    global $dbNumberParkingTickets;
+    if ($dbSubmissionType == 'groep') {
+        if (!empty($entry[27])) {
+            $dbNumberParkingTickets = $entry[27];
+        }
+    } else if($dbSubmissionType == 'individu') {
+        if (!empty($entry[22]) && $entry[22] == 'Ja') {
+            $dbNumberParkingTickets = 1;
+        } else {
+            $dbNumberParkingTickets = 0;
+        }
+    }
+
+    global $dbReductionCode;
+    if (!empty($entry[21])) {
+        $dbReductionCode = strtolower(trim($entry[21]));
+    } else {
+        $dbReductionCode = '';
+    }
+
+    global $dbNotes;
+    $dbNotes = $entry['23'];
+}
+
+/*
+function processInvoiceNAWFields($newSubmission, $entry) {
+    $newSubmission['invoice_firstname'] = $entry['17.3'];
+    $newSubmission['invoice_lastname'] = $entry['17.6'];
+    $newSubmission['invoice_adress'] = $entry['18.1'];
+    $newSubmission['invoice_zipcode'] = $entry['18.3'];
+    $newSubmission['invoice_city'] = $entry['18.5'];
+    $newSubmission['invoice_email'] = $entry['19'];
+    $newSubmission['invoice_extra_information'] = $entry['20'];
+    $newSubmission['invoice_event_nr'] = '8000';
+
+    return $newSubmission;
+}
+
+function processInvoicePaymentFields($newSubmission, $entry) {
+    global $wpdb;
+    $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
+
+    $invoice_count = $count + 1;
+    $invoice_cost_post = 'HGKF18';
+    $invoice_follow_nr = '2018' . str_pad($invoice_count, 4, "0", STR_PAD_LEFT);
+
+    $newSubmission['invoice_number'] = $invoice_cost_post . $invoice_follow_nr;
+    $newSubmission['invoice_debiteur_nr'] = $invoice_count + 1600;
+    $newSubmission['invoice_book_nr'] = '71';
+    $newSubmission['invoice_cost_post'] = $invoice_cost_post;
+    $newSubmission['invoice_expiration_days'] = '14';
+    $newSubmission['invoice_btw_type'] = '2';
+    $newSubmission['invoice_cost_post'] = 'HGKF18';
+    $newSubmission['invoice_description'] = 'Deelname Het Grootste Kennisfestival';
+    $newSubmission['invoice_row_description'] = 'Deelname Het Grootste Kennisfestival';
+
+    return $newSubmission;
+}
+
+function processPaymentFields($entry) {
+ /*   'price'=>$total_price,
+                    'tax'=>$total_btw,
+                    'price_tax'=>$total_price_btw,
+}*/
+
+function saveSubmission(){
+    global $dbSubmissionId;
+     $dbSubmissionType;
+    global $dbSubmissionDate;
+    global $dbSubmissionOrganization;
+    global $dbNumberParkingTickets;
+
+
+
+    $newSubmission['submission_id'] = $dbSubmissionId;
+    $newSubmission['submission_type'] = $dbSubmissionType;
+    $newSubmission['submission_date'] = $dbSubmissionDate;
+    $newSubmission['organization'] = $dbSubmissionOrganization;
+    $newSubmission['parking_tickets'] = $dbNumberParkingTickets;
+
+
+    $newSubmission['reduction_code'] = $reduction_code;
+    $newSubmission['notes'] = $entry['23'];
+    $newSubmission['invoice_firstname'] = $entry['17.3'];
+    $newSubmission['invoice_lastname'] = $entry['17.6'];
+    $newSubmission['invoice_adress'] = $entry['18.1'];
+    $newSubmission['invoice_zipcode'] = $entry['18.3'];
+    $newSubmission['invoice_city'] = $entry['18.5'];
+    $newSubmission['invoice_email'] = $entry['19'];
+    $newSubmission['invoice_extra_information'] = $entry['20'];
+    $newSubmission['invoice_event_nr'] = '8000';
+    $newSubmission['invoice_number'] = $invoice_cost_post . $invoice_follow_nr;
+    $newSubmission['invoice_debiteur_nr'] = $invoice_count + 1600;
+    $newSubmission['invoice_book_nr'] = '71';
+    $newSubmission['invoice_cost_post'] = $invoice_cost_post;
+    $newSubmission['invoice_expiration_days'] = '14';
+    $newSubmission['invoice_btw_type'] = '2';
+    $newSubmission['invoice_cost_post'] = 'HGKF18';
+    $newSubmission['invoice_description'] = 'Deelname Het Grootste Kennisfestival';
+    $newSubmission['invoice_row_description'] = 'Deelname Het Grootste Kennisfestival';
+
+}
+function debug_to_console( $data ) {
+    $output = $data;
+    if ( is_array( $output ) )
+        $output = implode( ',', $output);
+
+    echo "<script>console.log( 'Debug Objects: " . $output . "' );</script>";
+}
+
+?>

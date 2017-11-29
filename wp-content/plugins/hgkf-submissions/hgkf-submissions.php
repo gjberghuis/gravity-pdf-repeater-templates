@@ -14,6 +14,7 @@ if (!class_exists('WP_List_Table')) {
 
 require_once('includes/submissions.php');
 require_once('includes/reductions-codes.php');
+require_once('includes/process-gravity-entry');
 
 $submissionCollection = [];
 

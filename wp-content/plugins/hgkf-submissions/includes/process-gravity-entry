@@ -3,6 +3,17 @@
 // SETTINGS
 const db_submission_table = 'word1_submissions';
 const form_id = 3;
+const price_single_ticket = 195;
+const price_parking_ticket = 10;
+const btw_low_nr = '1';
+const btw_low = 0.06;
+const btw_high_nr = '2';
+const btw_high = 0.21;
+const food_price = 19.25;
+const payment_detail_description_low_btw = 'Vertering Het Grootste Kennisfestival';
+const payment_detail_description_high_btw = 'Deelname Het Grootste Kennisfestival';
+const payment_detail_event_nr_low_btw = '8030';
+const payment_detail_event_nr_high_btw = '8000';
 
 // GLOBAL FIELDS
 $dbSubmissionType;
@@ -12,14 +23,38 @@ $dbSubmissionOrganization;
 $dbNumberParkingTickets;
 $dbReductionCode;
 $dbNotes;
+$dbInvoiceFirstName;
+$dbInvoiceLastName;
+$dbInvoiceAdress;
+$dbInvoiceZipcode;
+$dbInvoiceCity;
+$dbInvoiceEmail;
+$dbInvoiceExtraInformation;
+$dbInvoiceEventNr;
+$dbInvoiceFollowNumber;
+$dbInvoiceNumber;
+$dbInvoiceDebiteurNr;
+$dbInvoiceBookNr;
+$dbInvoiceCostPost;
+$dbInvoiceExpirationDays;
+$dbInvoiceBtwType;
+$dbInvoiceDescription;
+$dbInvoiceRowDescription;
+$dbExpirationDate;
 
+$dbPricePartHigh;
+$dbPricePartHighBtw;
+$dbPricePartHighTotal;
+$dbPricePartLowTotal;
+$dbPricePartLow;
+$dbPricePartLowBtw;
 /*
 * Use the gravity hook to process the data to our own tables
 */
 add_action('gform_entry_created', 'processGravityEntryData', 10, form_id);
 function processGravityEntryData($entry, $form)
 {
-global $dbSubmissionType;
+    global $dbSubmissionType;
     if (form_id === 3) {
         // Check if the entry is already present in the database
         global $wpdb;
@@ -30,26 +65,34 @@ global $dbSubmissionType;
             return;
         }
 
+        debug_to_console("Adding new entry with id: " . $entry['id']);
+
         processSubmission($entry);
         if ($dbSubmissionType === 'geen') {
             return;
         }
 
-      //  $newSubmission = array();
+        debug_to_console("Processing submission completed");
+        processInvoiceNAWFields($entry);
 
-       // $newSubmission = processInvoiceNAWFields($entry);
-       // $newSubmission = processInvoicePaymentFields($entry);
-       // $newSubmission = processExtraFields($entry);
+        debug_to_console("Processing NAW completed");
 
-        //var_dump($newSubmission);
-        //die();
+        processInvoicePaymentFields($entry);
+        debug_to_console("Processing Invoice Payment completed");
+
+        processPaymentFields($entry);
+        debug_to_console("Processing Payment completed");
+
+        saveSubmission();
+        debug_to_console("Saving entry completed");
+
+        die();
     }
 }
 
 /*
  * Process functions
  */
-
 function processSubmission($entry)
 {
     // Submission id
@@ -80,7 +123,7 @@ function processSubmission($entry)
         if (!empty($entry[27])) {
             $dbNumberParkingTickets = $entry[27];
         }
-    } else if($dbSubmissionType == 'individu') {
+    } else if ($dbSubmissionType == 'individu') {
         if (!empty($entry[22]) && $entry[22] == 'Ja') {
             $dbNumberParkingTickets = 1;
         } else {
@@ -97,92 +140,279 @@ function processSubmission($entry)
 
     global $dbNotes;
     $dbNotes = $entry['23'];
+
+    global $dbExpirationDate;
+    $dbExpirationDate = date('Y-m-d H:i:s', strtotime("+14 days"));
 }
 
-/*
-function processInvoiceNAWFields($newSubmission, $entry) {
-    $newSubmission['invoice_firstname'] = $entry['17.3'];
-    $newSubmission['invoice_lastname'] = $entry['17.6'];
-    $newSubmission['invoice_adress'] = $entry['18.1'];
-    $newSubmission['invoice_zipcode'] = $entry['18.3'];
-    $newSubmission['invoice_city'] = $entry['18.5'];
-    $newSubmission['invoice_email'] = $entry['19'];
-    $newSubmission['invoice_extra_information'] = $entry['20'];
-    $newSubmission['invoice_event_nr'] = '8000';
+function processInvoiceNAWFields($entry)
+{
+    global $dbInvoiceFirstName;
+    $dbInvoiceFirstName = $entry['17.3'];
 
-    return $newSubmission;
+    global $dbInvoiceLastName;
+    $dbInvoiceLastName = $entry['17.6'];
+
+    global $dbInvoiceAdress;
+    $dbInvoiceAdress = $entry['18.1'];
+
+    global $dbInvoiceZipcode;
+    $dbInvoiceZipcode = $entry['18.3'];
+
+    global $dbInvoiceCity;
+    $dbInvoiceCity = $entry['18.5'];
+
+    global $dbInvoiceEmail;
+    $dbInvoiceEmail = $entry['19'];
+
+    global $dbInvoiceExtraInformation;
+    $dbInvoiceExtraInformation = $entry['20'];
+
+    global $dbInvoiceEventNr;
+    $dbInvoiceEventNr = '8000';
 }
 
-function processInvoicePaymentFields($newSubmission, $entry) {
+function processInvoicePaymentFields($entry)
+{
     global $wpdb;
     $count = $wpdb->get_var("SELECT COUNT(*) FROM word1_submissions");
 
     $invoice_count = $count + 1;
     $invoice_cost_post = 'HGKF18';
-    $invoice_follow_nr = '2018' . str_pad($invoice_count, 4, "0", STR_PAD_LEFT);
 
-    $newSubmission['invoice_number'] = $invoice_cost_post . $invoice_follow_nr;
-    $newSubmission['invoice_debiteur_nr'] = $invoice_count + 1600;
-    $newSubmission['invoice_book_nr'] = '71';
-    $newSubmission['invoice_cost_post'] = $invoice_cost_post;
-    $newSubmission['invoice_expiration_days'] = '14';
-    $newSubmission['invoice_btw_type'] = '2';
-    $newSubmission['invoice_cost_post'] = 'HGKF18';
-    $newSubmission['invoice_description'] = 'Deelname Het Grootste Kennisfestival';
-    $newSubmission['invoice_row_description'] = 'Deelname Het Grootste Kennisfestival';
+    global $dbInvoiceFollowNumber;
+    $dbInvoiceFollowNumber = '2018' . str_pad($invoice_count, 4, "0", STR_PAD_LEFT);
+
+    global $dbInvoiceNumber;
+    $dbInvoiceNumber = $invoice_cost_post . $dbInvoiceFollowNumber;
+
+    global $dbInvoiceDebiteurNr;
+    $dbInvoiceDebiteurNr = $invoice_count + 1600;
+
+    global $dbInvoiceBookNr;
+    $dbInvoiceBookNr = '71';
+
+    global $dbInvoiceCostPost;
+    $dbInvoiceCostPost = $invoice_cost_post;
+
+    global $dbInvoiceExpirationDays;
+    $dbInvoiceExpirationDays = '14';
+
+    global $dbInvoiceBtwType;
+    $dbInvoiceBtwType = '2';
+
+    global $dbInvoiceDescription;
+    $dbInvoiceDescription = 'Deelname Het Grootste Kennisfestival';
+
+    global $dbInvoiceRowDescription;
+    $dbInvoiceRowDescription = 'Deelname Het Grootste Kennisfestival';
 
     return $newSubmission;
 }
 
-function processPaymentFields($entry) {
- /*   'price'=>$total_price,
-                    'tax'=>$total_btw,
-                    'price_tax'=>$total_price_btw,
-}*/
+function processPaymentFields($entry)
+{
+    // Calculate price of a ticket
+    global $dbTicketPrice;
+    $dbTicketPrice = price_single_ticket;
 
-function saveSubmission(){
+    // Check for reduction and change the ticket price
+    global $dbReductionCode;
+    $freeParkingTicket = false;
+    if ($dbReductionCode && $dbReductionCode != '') {
+        global $wpdb;
+        $sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes where code = '" . $kortingsCode . "'";
+        $result = $wpdb->get_results($sql, 'ARRAY_A');
+
+        if (count($result) > 0) {
+            $dbTicketPrice = $result[0]['ticket_price'];
+            $freeParkingTicket = $result[0]['free_parking_ticket'] == 1 ? true : false;
+        }
+    }
+
+    // Calculate parking costs and add to the ticketprice
+    global $dbNumberParkingTickets;
+    if ($dbNumberParkingTickets > 0 && !$freeParkingTicket) {
+        $dbTicketPrice += (price_parking_ticket * $dbNumberParkingTickets);
+    }
+
+    // Calculate high btw first substract the food (low btw) and split into parking ticket and ticket
+    global $dbPricePartHigh;
+    global $dbPricePartHighBtw;
+    if ($dbNumberParkingTickets > 0) {
+        // Parking costs and btw
+        $price_parkingtickets = ($dbNumberParkingTickets * price_parking_ticket);
+        $price_parkingtickets_btw = $price_parkingtickets * btw_high;
+        $price_parkingtickets_total = $price_parkingtickets + $price_parkingtickets_btw;
+
+        $price_ticket_ex_food = $dbTicketPrice - (food_price + $price_parkingtickets);
+        // If there is a reduction price which is smaller than the food price the price part high will be below zero
+        if ($price_ticket_ex_food < 0) {
+            $price_ticket_ex_food = 0;
+        }
+        $dbPricePartHigh = $price_ticket_ex_food + $price_parkingtickets;
+        $dbPricePartHighBtw = $dbPricePartHigh * btw_high;
+
+        $btw_part_high_btw = $price_parkingtickets_btw + $dbPricePartHighBtw;
+    } else {
+        $price_ticket = $dbTicketPrice - food_price;
+        // If there is a reduction price which is smaller than the food price the price part high will be below zero
+        if ($price_ticket < 0) {
+            $price_ticket = 0;
+        }
+        $dbPricePartHigh = $price_ticket;
+        $dbPricePartHighBtw = $price_ticket * btw_high;
+    }
+
+    global $dbPricePartHighTotal;
+    $dbPricePartHighTotal = $dbPricePartHigh + $dbPricePartHighBtw;
+
+    // Calculate low btw
+    // When the reduction price is smaller than the food price take the reduction price
+    global $dbPricePartLow;
+    $dbPricePartLow = food_price;
+    if ($dbTicketPrice < food_price) {
+        $dbPricePartLow = $dbTicketPrice;
+    }
+
+    global $dbPricePartLowBtw;
+    global $dbPricePartLowTotal;
+    $dbPricePartLowBtw = $dbPricePartLow * btw_low;
+    $dbPricePartLowTotal = $dbPricePartLow + $dbPricePartLowBtw;
+
+    // Payment details
+    global $dbTotalBtw;
+    $dbTotalBtw = $dbTicketPrice * 0.21;
+
+    $rounded_total_price = number_format($dbTicketPrice * 100, 0, ',', '');
+    $rounded_btw_part_low = number_format($dbPricePartLowBtw * 100, 0, ',', '');
+    $rounded_btw_part_high = number_format($dbPricePartHighBtw * 100, 0, ',', '');
+
+    global $dbTotalPriceBtw;
+    $dbTotalPriceBtw = ($rounded_total_price + $rounded_btw_part_low + $rounded_btw_part_high) / 100;
+}
+
+function saveSubmission()
+{
     global $dbSubmissionId;
-     $dbSubmissionType;
+    global $dbSubmissionType;
     global $dbSubmissionDate;
     global $dbSubmissionOrganization;
     global $dbNumberParkingTickets;
+    global $dbInvoiceFirstName;
+    global $dbInvoiceLastName;
+    global $dbInvoiceAdress;
+    global $dbInvoiceZipcode;
+    global $dbInvoiceCity;
+    global $dbInvoiceEmail;
+    global $dbInvoiceExtraInformation;
+    global $dbInvoiceEventNr;
+    global $dbInvoiceNumber;
+    global $dbInvoiceDebiteurNr;
+    global $dbInvoiceBookNr;
+    global $dbInvoiceCostPost;
+    global $dbInvoiceExpirationDays;
+    global $dbInvoiceBtwType;
+    global $dbInvoiceDescription;
+    global $dbInvoiceRowDescription;
+    global $dbReductionCode;
+    global $dbNotes;
+    global $dbInvoiceFollowNumber;
+    global $dbExpirationDate;
+    global $dbTotalPriceBtw;
+    global $dbTicketPrice;
+    global $dbTotalBtw;
 
+    global $wpdb;
 
+    debug_to_console('Table: ' . db_submission_table);
+    $wpdb->insert(db_submission_table,
+        array(
+            'submission_id' => $dbSubmissionId,
+            'invoice_debiteur_nr' => $dbInvoiceDebiteurNr,
+            'invoice_number' => $dbInvoiceNumber,
+            'invoice_book_nr' => $dbInvoiceBookNr,
+            'invoice_cost_post' => $dbInvoiceCostPost,
+            'invoice_description' => $dbInvoiceDescription,
+            'invoice_row_description' => $dbInvoiceRowDescription,
+            'invoice_follow_nr' => $dbInvoiceFollowNumber,
+            'submission_type' => $dbSubmissionType,
+            'submission_date' => $dbSubmissionDate,
+            'invoice_expiration_days' => $dbInvoiceExpirationDays,
+            'expiration_date' => $dbExpirationDate,
+            'organization' => $dbSubmissionOrganization,
+            'invoice_firstname' => $dbInvoiceFirstName,
+            'invoice_lastname' => $dbInvoiceLastName,
+            'invoice_adress' => $dbInvoiceAdress,
+            'invoice_zipcode' => $dbInvoiceZipcode,
+            'invoice_city' => $dbInvoiceCity,
+            'invoice_event_nr' => $dbInvoiceEventNr,
+            'price' => $dbTicketPrice,
+            'invoice_btw_type' => $dbInvoiceBtwType,
+            'tax' => $dbTotalBtw,
+            'price_tax' => $dbTotalPriceBtw,
+            'invoice_email' => $dbInvoiceEmail,
+            'invoice_extra_information' => $dbInvoiceExtraInformation,
+            'parking_tickets' => $dbNumberParkingTickets,
+            'reduction_code' => $dbReductionCode,
+            'notes' => $dbNotes
+        )
+    );
 
-    $newSubmission['submission_id'] = $dbSubmissionId;
-    $newSubmission['submission_type'] = $dbSubmissionType;
-    $newSubmission['submission_date'] = $dbSubmissionDate;
-    $newSubmission['organization'] = $dbSubmissionOrganization;
-    $newSubmission['parking_tickets'] = $dbNumberParkingTickets;
+    // First payment detail: insert the entree payment detail row (with btw high)
+    global $dbPricePartHighTotal;
+    global $dbPricePartHigh;
+    global $dbPricePartHighBtw;
 
+    $wpdb->insert('word1_submission_payment_details',
+        array(
+            'invoice_id' => $dbSubmissionId,
+            'event' => payment_detail_event_nr_high_btw,
+            'price' => $dbPricePartHigh,
+            'btw_type' => btw_high_nr,
+            'tax' => $dbPricePartHighBtw,
+            'row_description' => payment_detail_description_high_btw,
+            'price_tax' => $dbPricePartHighTotal,
+            'invoice_number' => $dbInvoiceNumber
+        )
+    );
 
-    $newSubmission['reduction_code'] = $reduction_code;
-    $newSubmission['notes'] = $entry['23'];
-    $newSubmission['invoice_firstname'] = $entry['17.3'];
-    $newSubmission['invoice_lastname'] = $entry['17.6'];
-    $newSubmission['invoice_adress'] = $entry['18.1'];
-    $newSubmission['invoice_zipcode'] = $entry['18.3'];
-    $newSubmission['invoice_city'] = $entry['18.5'];
-    $newSubmission['invoice_email'] = $entry['19'];
-    $newSubmission['invoice_extra_information'] = $entry['20'];
-    $newSubmission['invoice_event_nr'] = '8000';
-    $newSubmission['invoice_number'] = $invoice_cost_post . $invoice_follow_nr;
-    $newSubmission['invoice_debiteur_nr'] = $invoice_count + 1600;
-    $newSubmission['invoice_book_nr'] = '71';
-    $newSubmission['invoice_cost_post'] = $invoice_cost_post;
-    $newSubmission['invoice_expiration_days'] = '14';
-    $newSubmission['invoice_btw_type'] = '2';
-    $newSubmission['invoice_cost_post'] = 'HGKF18';
-    $newSubmission['invoice_description'] = 'Deelname Het Grootste Kennisfestival';
-    $newSubmission['invoice_row_description'] = 'Deelname Het Grootste Kennisfestival';
+    debug_to_console('Inserted btw high in payment details table');
 
+    // Second payment detail: insert the food payment detail row (with btw low)
+    global $dbPricePartLowBtw;
+    global $dbPricePartLow;
+    global $dbPricePartLowTotal;
+
+    $wpdb->insert('word1_submission_payment_details',
+        array(
+            'invoice_id' => $dbSubmissionId,
+            'event' => payment_detail_event_nr_low_btw,
+            'price' => $dbPricePartLow,
+            'btw_type' => btw_low_nr,
+            'tax' => $dbPricePartLowBtw,
+            'row_description' => payment_detail_description_low_btw,
+            'price_tax' => $dbPricePartLowTotal,
+            'invoice_number' => $dbInvoiceNumber
+        )
+    );
+
+    debug_to_console('Inserted btw low in payment details table');
+
+    debug_to_console($wpdb->last_query);
+    debug_to_console($wpdb->last_error);
+    if ($wpdb->last_error !== '') :
+        $wpdb->print_error();
+    endif;
 }
-function debug_to_console( $data ) {
-    $output = $data;
-    if ( is_array( $output ) )
-        $output = implode( ',', $output);
 
-    echo "<script>console.log( 'Debug Objects: " . $output . "' );</script>";
+function debug_to_console($data)
+{
+    $output = $data;
+    if (is_array($output))
+        $output = implode(',', $output);
+
+    echo "<script>console.log( 'Debug php: " . $output . "' );</script>";
 }
 
 ?>

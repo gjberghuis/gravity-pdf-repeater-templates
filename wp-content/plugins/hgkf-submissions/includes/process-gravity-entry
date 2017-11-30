@@ -48,6 +48,8 @@ $dbPricePartHighTotal;
 $dbPricePartLowTotal;
 $dbPricePartLow;
 $dbPricePartLowBtw;
+
+$dbParticipants;
 /*
 * Use the gravity hook to process the data to our own tables
 */
@@ -83,6 +85,9 @@ function processGravityEntryData($entry, $form)
         processPaymentFields($entry);
         debug_to_console("Processing Payment completed");
 
+        processParticipants($entry, $form);
+        debug_to_console("Processing Participants completed");
+
         saveSubmission();
         debug_to_console("Saving entry completed");
 
@@ -103,9 +108,9 @@ function processSubmission($entry)
     global $dbSubmissionType;
 
     if ($entry['1']) {
-        if (strpos(strtolower('individuele', $entry['1'])) !== false) {
+        if (strpos(strtolower($entry['1']), 'individu') !== false) {
             $dbSubmissionType = 'individu';
-        } else if (strpos('groep', strtolower($entry['1'])) !== false) {
+        } else if (strpos(strtolower($entry['1']), 'groep') !== false) {
             $dbSubmissionType = 'groep';
         } else {
             $dbSubmissionType = 'geen';
@@ -208,6 +213,61 @@ function processInvoicePaymentFields($entry)
     $dbInvoiceRowDescription = 'Deelname Het Grootste Kennisfestival';
 
     return $newSubmission;
+}
+
+function processParticipants($entry, $form) {
+    global $dbParticipants;
+    $dbParticipants = [];
+    // The main participant is the non repeater participant
+    $mainParticipant = [];
+
+    if (!empty($entry['15.3']) && !empty($entry['15.6'])) {
+        $mainParticipant['Naam'] = $entry['15.3'] . " " . $entry['15.6'];
+    }
+    if (!empty($entry[13])) {
+        $mainParticipant['E-mailadres'] = $entry[13];
+    }
+    $dbParticipants[] = $mainParticipant;
+
+    // Search for repeater fields and loop through the repeater field -> 'Meer deelnemers toevoegen'
+    $repeaterID = '';
+    foreach ($form['fields'] as $key => $formField) {
+        if (get_class($formField) == 'GF_Field_Repeater') {
+            if ($formField[label] == 'deelnemers-repeater') {
+                $repeaterID = $formField[id];
+            }
+        }
+    }
+
+    // SEARCH THROUGH ENTRY FOR THE FIELD ID OF THE REPEATER
+    foreach ($entry as $key => $formEntry) {
+        // Check if the field is the repeater field
+        if ($key == $repeaterID) {
+            // Breakdown the repeater's inputs. us = un-serialized.
+            $usEntry = unserialize($formEntry);
+        }
+    }
+
+    foreach ($usEntry as $keyOneEntry => $oneEntry) {
+        $participant = array();
+        // MATCH UP THE FIELDS AND INPUTS
+        $singleRepeat = '';
+        foreach ($form[fields] as $key => $formField) {
+            $fieldId = $formField[id];
+            if (array_key_exists($fieldId, $oneEntry)) {
+                $singleInput = implode(" ", $oneEntry[$fieldId]);
+                // Only include inputs that aren't empty
+                if (!empty($singleInput)) {
+                    $participant[$formField[label]] = $singleInput;
+                    $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
+                }
+            }
+        }
+        $dbParticipants[] = $participant;
+
+        array_push($repeats, $singleRepeat);
+        unset($singleRepeat);
+    }
 }
 
 function processPaymentFields($entry)
@@ -398,6 +458,19 @@ function saveSubmission()
     );
 
     debug_to_console('Inserted btw low in payment details table');
+
+    global $dbParticipants;
+    foreach ($dbParticipants as $part) {
+        $wpdb->insert('word1_submission_participants',
+            array(
+                'invoice_id' => $dbSubmissionId,
+                'name' => $part['Naam'],
+                'email' => $part['E-mailadres']
+            )
+        );
+    }
+
+    debug_to_console('Inserted participants into participants table');
 
     debug_to_console($wpdb->last_query);
     debug_to_console($wpdb->last_error);

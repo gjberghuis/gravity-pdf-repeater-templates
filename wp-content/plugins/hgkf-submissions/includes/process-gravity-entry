@@ -124,6 +124,8 @@ function processSubmission($entry)
     $dbSubmissionOrganization = $entry['16'];
 
     global $dbNumberParkingTickets;
+    $dbNumberParkingTickets = 0;
+
     if ($dbSubmissionType == 'groep') {
         if (!empty($entry[27])) {
             $dbNumberParkingTickets = $entry[27];
@@ -281,7 +283,7 @@ function processPaymentFields($entry)
     $freeParkingTicket = false;
     if ($dbReductionCode && $dbReductionCode != '') {
         global $wpdb;
-        $sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes where code = '" . $kortingsCode . "'";
+        $sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes where code = '" . $dbReductionCode . "'";
         $result = $wpdb->get_results($sql, 'ARRAY_A');
 
         if (count($result) > 0) {

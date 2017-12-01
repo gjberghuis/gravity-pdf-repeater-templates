@@ -12,6 +12,7 @@ if (!class_exists('WP_List_Table')) {
     require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 }
 
+require_once('includes/settings.php');
 require_once('includes/submissions.php');
 require_once('includes/reductions-codes.php');
 require_once('includes/process-gravity-entry');
@@ -24,6 +25,7 @@ function my_add_menu_items()
     add_submenu_page('my_submissions_overview', 'Kortingscodes', 'Kortingscodes', 'manage_options', 'reduction_codes', 'render_reduction_codes_page');
     add_submenu_page(null, 'Kortingscode toevoegen', 'Kortingscode toevoegen', 'manage_options', 'add_reduction_code', 'render_add_reduction_code_page');
     add_submenu_page(null, 'Kortingscode bewerken', 'Kortingscode bewerken', 'manage_options', 'edit_reduction_code', 'render_edit_reduction_code_page');
+    add_submenu_page('my_submissions_overview', 'Instellingen', 'Instellingen', 'manage_options', 'settings', 'render_settings_page');
     add_action("load-$hookSubmissions", 'add_options_submissions');
 }
 

@@ -3,18 +3,6 @@
 // SETTINGS
 const db_submission_table = 'word1_submissions';
 const form_id = 3;
-const price_single_ticket = 195;
-const price_group_ticket = 175;
-const price_parking_ticket = 10;
-const btw_low_nr = '1';
-const btw_low = 0.06;
-const btw_high_nr = '2';
-const btw_high = 0.21;
-const food_price = 19.25;
-const payment_detail_description_low_btw = 'Vertering Het Grootste Kennisfestival';
-const payment_detail_description_high_btw = 'Deelname Het Grootste Kennisfestival';
-const payment_detail_event_nr_low_btw = '8030';
-const payment_detail_event_nr_high_btw = '8000';
 
 // GLOBAL FIELDS
 $dbSubmissionType;
@@ -57,6 +45,8 @@ $dbParticipants;
 add_action('gform_entry_created', 'processGravityEntryData', 10, form_id);
 function processGravityEntryData($entry, $form)
 {
+    processSettings();
+
     global $dbSubmissionType;
     if (form_id === 3) {
         // Check if the entry is already present in the database
@@ -99,6 +89,50 @@ function processGravityEntryData($entry, $form)
 /*
  * Process functions
  */
+function processSettings(){
+    global $price_single_ticket;
+    $price_single_ticket = 195;
+    global $price_group_ticket;
+    $price_group_ticket = 175;
+    global $price_parking_ticket;
+    $price_parking_ticket = 10;
+    global $btw_low_nr;
+    $btw_low_nr = '1';
+    global $btw_low;
+    $btw_low = 0.06;
+    global $btw_high_nr;
+    $btw_high_nr = '2';
+    global $btw_high;
+    $btw_high = 0.21;
+    global $food_price;
+    $food_price = 19.25;
+    global $payment_detail_description_low_btw;
+    $payment_detail_description_low_btw = 'Vertering Het Grootste Kennisfestival';
+    global $payment_detail_description_high_btw;
+    $payment_detail_description_high_btw = 'Deelname Het Grootste Kennisfestival';
+    global $payment_detail_event_nr_low_btw;
+    $payment_detail_event_nr_low_btw = '8030';
+    global $payment_detail_event_nr_high_btw;
+    $payment_detail_event_nr_high_btw = '8000';
+
+    global $wpdb;
+    $settings = $wpdb->get_results("SELECT * FROM word1_submissions_settings where preset = 1");
+
+    if($settings && $settings[0]) {
+        $price_single_ticket = $settings[0]->price_single_ticket;
+        $price_group_ticket = $settings[0]->price_group_ticket;
+        $price_parking_ticket = $settings[0]->price_parking_ticket;
+        $btw_low_nr = $settings[0]->btw_low_nr;
+        $btw_low = $settings[0]->btw_low;
+        $btw_high_nr = $settings[0]->btw_high_nr;
+        $btw_high = $settings[0]->btw_high;
+        $food_price = $settings[0]->food_price;
+        $payment_detail_description_low_btw = $settings[0]->payment_detail_description_low_btw;
+        $payment_detail_description_high_btw = $settings[0]->payment_detail_description_high_btw;
+        $payment_detail_event_nr_low_btw = $settings[0]->payment_detail_event_nr_low_btw;
+        $payment_detail_event_nr_high_btw = $settings[0]->payment_detail_event_nr_high_btw;
+    }
+}
 function processSubmission($entry)
 {
     // Submission id
@@ -214,8 +248,6 @@ function processInvoicePaymentFields($entry)
 
     global $dbInvoiceRowDescription;
     $dbInvoiceRowDescription = 'Deelname Het Grootste Kennisfestival';
-
-    return $newSubmission;
 }
 
 function processParticipants($entry, $form) {
@@ -279,10 +311,12 @@ function processPaymentFields($entry)
     global $dbTicketPrice;
 
     global $dbSubmissionType;
+    global $price_single_ticket;
+    global $price_group_ticket;
     if ($dbSubmissionType == 'groep') {
-        $dbTicketPrice = price_group_ticket;
+        $dbTicketPrice = $price_group_ticket;
     } else if ($dbSubmissionType == 'individu') {
-        $dbTicketPrice = price_single_ticket;
+        $dbTicketPrice = $price_single_ticket;
     }
 
     // Check for reduction and change the ticket price
@@ -304,16 +338,19 @@ function processPaymentFields($entry)
     // Calculate high btw first substract the food (low btw) and split into parking ticket and ticket
     global $dbPricePartHigh;
     global $dbPricePartHighBtw;
+    global $price_parking_ticket;
+    global $btw_high;
 
     $price_parkingtickets = 0;
     if ($dbNumberParkingTickets > 0) {
         // Parking costs and btw
-        $price_parkingtickets = ($dbNumberParkingTickets * price_parking_ticket);
-        $price_parkingtickets_btw = $price_parkingtickets * btw_high;
-        $price_parkingtickets_total = $price_parkingtickets + $price_parkingtickets_btw;
+        $total_price_parkingtickets = ($dbNumberParkingTickets * $price_parking_ticket);
+        $price_parkingtickets_btw = $total_price_parkingtickets  * $btw_high;
+        $price_parkingtickets_total = $total_price_parkingtickets  + $price_parkingtickets_btw;
     }
 
-    $price_ticket_ex_food = $dbTicketPrice - food_price;
+    global $food_price;
+    $price_ticket_ex_food = $dbTicketPrice - $food_price;
 
     // If there is a reduction price which is smaller than the food price the price part high will be below zero
     if ($price_ticket_ex_food < 0) {
@@ -321,10 +358,11 @@ function processPaymentFields($entry)
     }
 
     global $dbParticipants;
+    global $btw_high;
     $participants_price_tickets = $price_ticket_ex_food * count($dbParticipants);
 
-    $dbPricePartHigh = $participants_price_tickets + $price_parkingtickets;
-    $dbPricePartHighBtw = $dbPricePartHigh * btw_high;
+    $dbPricePartHigh = $participants_price_tickets + $total_price_parkingtickets ;
+    $dbPricePartHighBtw = $dbPricePartHigh * $btw_high;
 
     global $dbPricePartHighTotal;
     $dbPricePartHighTotal = $dbPricePartHigh + $dbPricePartHighBtw;
@@ -332,15 +370,17 @@ function processPaymentFields($entry)
     // Calculate low btw
     // When the reduction price is smaller than the food price take the reduction price
     global $dbPricePartLow;
-    $dbPricePartLow = food_price;
-    if ($dbTicketPrice < food_price) {
+    $dbPricePartLow = $food_price;
+    if ($dbTicketPrice < $food_price) {
         $dbPricePartLow = $dbTicketPrice;
     }
 
     global $dbPricePartLowBtw;
     global $dbPricePartLowTotal;
+    global $btw_low;
+
     $particpants_price_part_low = count($dbParticipants) * $dbPricePartLow;
-    $dbPricePartLowBtw = $particpants_price_part_low * btw_low;
+    $dbPricePartLowBtw = $particpants_price_part_low * $btw_low;
     $dbPricePartLowTotal = $dbPricePartLow + $dbPricePartLowBtw;
 
     // Payment details
@@ -428,35 +468,41 @@ function saveSubmission()
     global $dbPricePartHighTotal;
     global $dbPricePartHigh;
     global $dbPricePartHighBtw;
+    global $btw_high_nr;
+    global $payment_detail_event_nr_high_btw;
+    global $payment_detail_description_high_btw;
 
     $wpdb->insert('word1_submission_payment_details',
         array(
             'invoice_id' => $dbSubmissionId,
-            'event' => payment_detail_event_nr_high_btw,
+            'event' => $payment_detail_event_nr_high_btw,
             'price' => $dbPricePartHigh,
-            'btw_type' => btw_high_nr,
+            'btw_type' => $btw_high_nr,
             'tax' => $dbPricePartHighBtw,
-            'row_description' => payment_detail_description_high_btw,
+            'row_description' => $payment_detail_description_high_btw,
             'price_tax' => $dbPricePartHighTotal,
             'invoice_number' => $dbInvoiceNumber
         )
     );
 
-    debug_to_console('Inserted btw high in payment details table');
+    debug_to_console('Inserted btw high in payment details table');   debug_to_console('Inserted btw high in payment details table');
 
     // Second payment detail: insert the food payment detail row (with btw low)
     global $dbPricePartLowBtw;
     global $dbPricePartLow;
     global $dbPricePartLowTotal;
+    global $btw_low_nr;
+    global $payment_detail_event_nr_low_btw;
+    global $payment_detail_description_low_btw;
 
     $wpdb->insert('word1_submission_payment_details',
         array(
             'invoice_id' => $dbSubmissionId,
-            'event' => payment_detail_event_nr_low_btw,
+            'event' => $payment_detail_event_nr_low_btw,
             'price' => $dbPricePartLow,
-            'btw_type' => btw_low_nr,
+            'btw_type' => $btw_low_nr,
             'tax' => $dbPricePartLowBtw,
-            'row_description' => payment_detail_description_low_btw,
+            'row_description' => $payment_detail_description_low_btw,
             'price_tax' => $dbPricePartLowTotal,
             'invoice_number' => $dbInvoiceNumber
         )

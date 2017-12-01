@@ -119,7 +119,7 @@
 
         echo '<tr>';
         echo '<td style="padding:20px;">';
-        echo '<input type="submit" value="Opslaan" name="saveSettings" />';
+        echo '<input type="submit" value="Opslaan" name="submit" />';
         echo '</td>';
         echo '</tr>';
         echo '</table>';
@@ -130,8 +130,8 @@
     add_action('admin_init', 'saveSettings');
 
     function saveSettings(){
-        debug_to_console('adsf');
-        if (!empty($_POST)) {
+        if (!empty($_POST) && isset($_POST['submit']))
+        {
             global $wpdb;
             $wpdb->update('word1_submissions_settings',
                 array(

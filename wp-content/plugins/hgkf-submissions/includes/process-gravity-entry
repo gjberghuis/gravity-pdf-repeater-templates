@@ -39,6 +39,13 @@ $dbPricePartLow;
 $dbPricePartLowBtw;
 
 $dbParticipants;
+
+// SETTINGS VARIABLES
+$btw_high;
+$btw_high_nr;
+$btw_low;
+$btw_low_nr;
+
 /*
 * Use the gravity hook to process the data to our own tables
 */
@@ -81,8 +88,6 @@ function processGravityEntryData($entry, $form)
 
         saveSubmission();
         debug_to_console("Saving entry completed");
-
-        die();
     }
 }
 
@@ -119,12 +124,12 @@ function processSettings(){
     $settings = $wpdb->get_results("SELECT * FROM word1_submissions_settings where preset = 1");
 
     if($settings && $settings[0]) {
-        $price_single_ticket = $settings[0]->price_single_ticket;
-        $price_group_ticket = $settings[0]->price_group_ticket;
-        $price_parking_ticket = $settings[0]->price_parking_ticket;
-        $btw_low_nr = $settings[0]->btw_low_nr;
+        $price_single_ticket = $settings[0]->ticket_price_single;
+        $price_group_ticket = $settings[0]->ticket_price_group;
+        $price_parking_ticket = $settings[0]->price_parkingticket;
+        $btw_low_nr = $settings[0]->btw_low_number;
         $btw_low = $settings[0]->btw_low;
-        $btw_high_nr = $settings[0]->btw_high_nr;
+        $btw_high_nr = $settings[0]->btw_high_number;
         $btw_high = $settings[0]->btw_high;
         $food_price = $settings[0]->food_price;
         $payment_detail_description_low_btw = $settings[0]->payment_detail_description_low_btw;
@@ -341,7 +346,7 @@ function processPaymentFields($entry)
     global $price_parking_ticket;
     global $btw_high;
 
-    $price_parkingtickets = 0;
+    $total_price_parkingtickets = 0;
     if ($dbNumberParkingTickets > 0) {
         // Parking costs and btw
         $total_price_parkingtickets = ($dbNumberParkingTickets * $price_parking_ticket);
@@ -358,7 +363,6 @@ function processPaymentFields($entry)
     }
 
     global $dbParticipants;
-    global $btw_high;
     $participants_price_tickets = $price_ticket_ex_food * count($dbParticipants);
 
     $dbPricePartHigh = $participants_price_tickets + $total_price_parkingtickets ;
@@ -387,7 +391,7 @@ function processPaymentFields($entry)
     global $dbTotalBtw;
     $dbTotalBtw = $dbPricePartLowBtw + $dbPricePartHighBtw;
     global $dbTotalPrice;
-    $dbTotalPrice = $dbTicketPrice * count($dbParticipants);
+    $dbTotalPrice = ($dbTicketPrice * count($dbParticipants)) + $total_price_parkingtickets;
 
     $rounded_total_price = number_format($dbTotalPrice * 100, 0, ',', '');
     $rounded_btw_part_low = number_format(($dbPricePartLowBtw) * 100, 0, ',', '');
@@ -485,7 +489,7 @@ function saveSubmission()
         )
     );
 
-    debug_to_console('Inserted btw high in payment details table');   debug_to_console('Inserted btw high in payment details table');
+    debug_to_console('Inserted btw high in payment details table');
 
     // Second payment detail: insert the food payment detail row (with btw low)
     global $dbPricePartLowBtw;
@@ -522,12 +526,6 @@ function saveSubmission()
     }
 
     debug_to_console('Inserted participants into participants table');
-
-    debug_to_console($wpdb->last_query);
-    debug_to_console($wpdb->last_error);
-    if ($wpdb->last_error !== '') :
-        $wpdb->print_error();
-    endif;
 }
 
 function debug_to_console($data)

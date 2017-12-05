@@ -501,10 +501,7 @@ $ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_p
     </div>
 
     <div class="payment-notification">
-        Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer
-        NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben
-        naar aanleiding van deze factuur dan kan je een mail sturen naar administratie@regioacademy.nl. Dan nemen we zo
-        snel mogelijk contact met je op.
+        <?php echo $settings[0]->invoice_description_text ?>
     </div>
 
     <div class="info">

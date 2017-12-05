@@ -12,6 +12,7 @@ $dbSubmissionOrganization;
 $dbNumberParkingTickets;
 $dbReductionCode;
 $dbNotes;
+
 $dbInvoiceFirstName;
 $dbInvoiceLastName;
 $dbInvoiceAdress;
@@ -26,6 +27,8 @@ $dbInvoiceDebiteurNr;
 $dbInvoiceBookNr;
 $dbInvoiceCostPost;
 $dbInvoiceExpirationDays;
+$dbInvoiceDescriptionText;
+
 $dbInvoiceBtwType;
 $dbInvoiceDescription;
 $dbInvoiceRowDescription;
@@ -120,6 +123,11 @@ function processSettings(){
     global $payment_detail_event_nr_high_btw;
     $payment_detail_event_nr_high_btw = '8000';
 
+    global $dbInvoiceExpirationDays;
+    $dbInvoiceExpirationDays = 14;
+    global $dbInvoiceDescriptionText;
+    $dbInvoiceDescriptionText = "Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben naar aanleiding van deze factuur dan kan je een mail sturen naar administratie@regioacademy.nl. Dan nemen we zo snel mogelijk contact met je op.";
+
     global $wpdb;
     $settings = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "submissions_settings where preset = 1");
 
@@ -136,6 +144,8 @@ function processSettings(){
         $payment_detail_description_high_btw = $settings[0]->payment_detail_description_high_btw;
         $payment_detail_event_nr_low_btw = $settings[0]->payment_detail_event_nr_low_btw;
         $payment_detail_event_nr_high_btw = $settings[0]->payment_detail_event_nr_high_btw;
+        $dbInvoiceExpirationDays = $settings[0]->invoice_expiration_days;
+        $dbInvoiceDescriptionText = $settings[0]->invoice_description_text;
     }
 }
 function processSubmission($entry)
@@ -189,7 +199,8 @@ function processSubmission($entry)
     $dbNotes = $entry['23'];
 
     global $dbExpirationDate;
-    $dbExpirationDate = date('Y-m-d H:i:s', strtotime("+14 days"));
+    global $dbInvoiceExpirationDays;
+    $dbExpirationDate = date('Y-m-d H:i:s', strtotime("+" . $dbInvoiceExpirationDays . " days"));
 }
 
 function processInvoiceNAWFields($entry)
@@ -241,9 +252,6 @@ function processInvoicePaymentFields($entry)
 
     global $dbInvoiceCostPost;
     $dbInvoiceCostPost = $invoice_cost_post;
-
-    global $dbInvoiceExpirationDays;
-    $dbInvoiceExpirationDays = '14';
 
     global $dbInvoiceBtwType;
     $dbInvoiceBtwType = '2';

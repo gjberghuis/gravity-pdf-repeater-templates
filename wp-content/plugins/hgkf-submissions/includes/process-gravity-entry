@@ -341,9 +341,21 @@ function processPaymentFields($entry)
 
         $result = $wpdb->get_results($sql, 'ARRAY_A');
 
+        global $price_parking_ticket;
         if (count($result) > 0) {
             $dbTicketPrice = $result[0]['ticket_price'];
+
             $freeParkingTicket = $result[0]['free_parking_ticket'] == 1 ? true : false;
+
+            global $dbParkingTicketFree;
+            $dbParkingTicketFree = $result[0]['free_parking_ticket'];
+
+            if ($freeParkingTicket) {
+                $dbTicketPrice = $dbTicketPrice - $price_parking_ticket;
+                if ($dbTicketPrice < 0 ) {
+                    $dbTicketPrice = 0;
+                }
+            }
         }
     }
 
@@ -440,6 +452,7 @@ function saveSubmission()
     global $dbTotalPriceBtw;
     global $dbTotalPrice;
     global $dbTotalBtw;
+    global $dbParkingTicketFree;
 
     global $wpdb;
 
@@ -473,6 +486,7 @@ function saveSubmission()
             'invoice_extra_information' => $dbInvoiceExtraInformation,
             'parking_tickets' => $dbNumberParkingTickets,
             'reduction_code' => $dbReductionCode,
+            'reduction_code_free_parking_ticket' => $dbParkingTicketFree,
             'notes' => $dbNotes
         )
     );

@@ -412,7 +412,7 @@ function convert_to_csv()
             } elseif (isset($_POST['download_invoices_new'])) {
                 $submissionId = $submissionTempArray['id'];
 
-                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event,  row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax FROM word1_submission_payment_details where invoice_id = " . $submissionId);
+                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event,  row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax FROM word1_submission_crm_details where invoice_id = " . $submissionId);
                 
                 foreach ($submissionPaymentDetails as $paymentDetail) {
                     $paymentArray = (array)$paymentDetail;

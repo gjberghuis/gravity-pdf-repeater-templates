@@ -499,7 +499,7 @@ function saveSubmission()
     global $payment_detail_event_nr_high_btw;
     global $payment_detail_description_high_btw;
 
-    $wpdb->insert($wpdb->prefix . 'submission_payment_details',
+    $wpdb->insert($wpdb->prefix . 'submission_crm_details',
         array(
             'invoice_id' => $dbSubmissionId,
             'event' => $payment_detail_event_nr_high_btw,
@@ -522,7 +522,7 @@ function saveSubmission()
     global $payment_detail_event_nr_low_btw;
     global $payment_detail_description_low_btw;
 
-    $wpdb->insert($wpdb->prefix . 'submission_payment_details',
+    $wpdb->insert($wpdb->prefix . 'submission_crm_details',
         array(
             'invoice_id' => $dbSubmissionId,
             'event' => $payment_detail_event_nr_low_btw,

@@ -367,7 +367,7 @@ global $wpdb;
 $query = "SELECT * FROM " . $wpdb->prefix . "submissions where submission_id = " . $submission_id;
 $results = $wpdb->get_results($query);
 
-$query = "SELECT * FROM " . $wpdb->prefix . "submission_payment_details where invoice_id = " . $submission_id;
+$query = "SELECT * FROM " . $wpdb->prefix . "submission_crm_details where invoice_id = " . $submission_id;
 $paymentDetails = $wpdb->get_results($query);
 
 $paymentDetailLow;

@@ -78,10 +78,7 @@ function render_submissions_overview_page()
             echo '<input type="submit" value="Download deelnemers in csv" name="download_participants" />';
             echo '</td>';
             echo '<td style="padding:20px;">';
-            echo '<input type="submit" value="Download facturen in csv" name="download_invoices" />';
-            echo '</td>';
-            echo '<td style="padding:20px;">';
-            echo '<input type="submit" value="Download facturen in csv (versie 2)" name="download_invoices_new" />';
+            echo '<input type="submit" value="Download facturen in csv" name="download_invoices_new" />';
             echo '</td>';
             echo '</tr>';
         echo '</table>';
@@ -307,9 +304,9 @@ add_action('admin_init', 'convert_to_csv');
 
 function convert_to_csv()
 { 
-    if (isset($_POST['download_participants']) || isset($_POST['download_invoices']) || isset($_POST['download_invoices_new'])) {
+    if (isset($_POST['download_participants']) || isset($_POST['download_invoices_new'])) {
         $downloadParticipantsFields = array('submission_type','submission_date','organization','reduction_code','notes','participant_firstname','participant_lastname','participant_email' );
-        $downloadInvoicesFields = array('submission_id','invoice_debiteur_nr','invoice_book_nr','invoice_cost_post','invoice_description','invoice_follow_nr','submission_type','submission_date','invoice_expiration_days','expiration_days','timestamp','organization','invoice_firstname','invoice_lastname','invoice_adress','invoice_zipcode','invoice_city','invoice_email','invoice_extra_information','parking_tickets','reduction_code','invoice_reduction_code','notes');
+        $downloadInvoicesFields = array('submission_id','debiteur_nr','book_nr','cost_post','description','follow_nr','submission_type','submission_date','expiration_days','expiration_days','timestamp','organization','firstname','lastname','adress','zipcode','city','email','extra_information','parking_tickets','reduction_code','reduction_code','notes');
    
         $date = '2016-11-01';
         $fromDate = date('Y-m-d', strtotime($date));
@@ -330,13 +327,22 @@ function convert_to_csv()
         $delimiter = ',';
 
         global $wpdb;
+
         foreach ($wpdb->get_col("DESC " . 'word1_submissions', 0) as $column_name) {
             if (isset($_POST['download_participants']) && in_array($column_name, $downloadParticipantsFields)) {
                 $header[] = $column_name;
             } elseif (isset($_POST['download_invoices_new']) && in_array($column_name, $downloadInvoicesFields)) {
                 $header[] = $column_name;
-            } elseif (isset($_POST['download_invoices'])) {
-                $header[] = $column_name;
+            }
+        }
+
+        foreach ($wpdb->get_col("DESC " . 'word1_submission_invoices', 0) as $column_name) {
+            if ($column_name != 'submission_id') {
+                if (isset($_POST['download_participants']) && in_array($column_name, $downloadParticipantsFields)) {
+                    $header[] = $column_name;
+                } elseif (isset($_POST['download_invoices_new']) && in_array($column_name, $downloadInvoicesFields)) {
+                    $header[] = $column_name;
+                }
             }
         }
 
@@ -357,7 +363,7 @@ function convert_to_csv()
         header('Content-Disposition: attachment; filename=' . $output_file_name);
         fputcsv($f, $header, ';');
 
-        $submissions = $wpdb->get_results("SELECT * FROM word1_submissions WHERE active < 1 OR active is NULL AND submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
+        $submissions = $wpdb->get_results("SELECT submission.*, invoice.* FROM word1_submissions as submission INNER JOIN word1_submission_invoices as invoice ON invoice.submission_id = submission.submission_id WHERE active < 1 OR active is NULL AND submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
 
         /* loop through array  */
         foreach ($submissions as $submission) {
@@ -382,9 +388,9 @@ function convert_to_csv()
             }
 
             if (isset($_POST['download_participants'])) {
-                $submissionId = $submissionTempArray['id'];
+                $submissionId = $submissionTempArray['submission_id'];
 
-                $submissionsOParticipants = $wpdb->get_results("SELECT * FROM word1_submission_participants where invoice_id = " . $submissionId);
+                $submissionsOParticipants = $wpdb->get_results("SELECT * FROM word1_submission_participants where submission_id = " . $submissionId);
 
                 foreach ($submissionsOParticipants as $participant) {
                     $participantArray = (array)$participant;
@@ -410,11 +416,10 @@ function convert_to_csv()
                     fputcsv($f, $lineArray, ';');
                 }
             } elseif (isset($_POST['download_invoices_new'])) {
-                $submissionId = $submissionTempArray['id'];
+                $submissionId = $submissionTempArray['submission_id'];
+                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event, row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax FROM word1_submission_crm_details where submission_id = " . $submissionId);
 
-                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event,  row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax FROM word1_submission_crm_details where invoice_id = " . $submissionId);
-                
-                foreach ($submissionPaymentDetails as $paymentDetail) {
+                 foreach ($submissionPaymentDetails as $paymentDetail) {
                     $paymentArray = (array)$paymentDetail;
                     
                     $lineArray = $submissionArray;

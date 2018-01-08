@@ -385,7 +385,7 @@ if (count($paymentDetails) > 0) {
 $query = "SELECT * FROM " . $wpdb->prefix . "submission_participants where invoice_id = " . $submission_id;
 $participants = $wpdb->get_results($query);
 
-$query = "SELECT * FROM " . $wpdb->prefix . "submissions_settings where preset = 1";
+$query = "SELECT * FROM " . $wpdb->prefix . "submission_settings where preset = 1";
 $settings = $wpdb->get_results($query);
 
 $ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_price_group : $settings[0]->ticket_price_single);

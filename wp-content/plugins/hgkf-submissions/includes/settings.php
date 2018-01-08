@@ -2,7 +2,7 @@
     function render_settings_page()
     {
         global $wpdb;
-        $settings = $wpdb->get_results("SELECT * FROM word1_submissions_settings where preset = 1");
+        $settings = $wpdb->get_results("SELECT * FROM word1_submission_settings where preset = 1");
 
         echo '</pre><div class="wrap"><h2>Aanmeldingen overzicht</h2>';
 
@@ -151,7 +151,7 @@
         if (!empty($_POST) && isset($_POST['submit']))
         {
             global $wpdb;
-            $wpdb->update('word1_submissions_settings',
+            $wpdb->update('word1_submission_settings',
                 array(
                     'ticket_price_single' => $_POST['ticket_price_single'],
                     'ticket_price_group' => $_POST['ticket_price_group'],

@@ -386,7 +386,7 @@ $value_border_colour = (!empty($settings['zadani_border_colour'])) ? $settings['
     $query = "SELECT * FROM " . $wpdb->prefix . "submission_participants where invoice_id = " . $submission_id;
     $participants = $wpdb->get_results($query);
 
-    $query = "SELECT * FROM " . $wpdb->prefix . "submissions_settings where preset = 1";
+    $query = "SELECT * FROM " . $wpdb->prefix . "submission_settings where preset = 1";
     $settings = $wpdb->get_results($query);
 ?>
 

@@ -364,31 +364,17 @@ $value_border_colour = (!empty($settings['zadani_border_colour'])) ? $settings['
 $submission_id = $entry['id'];
 global $wpdb;
 
-$query = "SELECT * FROM " . $wpdb->prefix . "submissions where submission_id = " . $submission_id;
-$results = $wpdb->get_results($query);
+$query = "SELECT * FROM " . $wpdb->prefix . "submission_invoices where submission_id = " . $submission_id;
+$invoice = $wpdb->get_results($query);
 
-$query = "SELECT * FROM " . $wpdb->prefix . "submission_crm_details where invoice_id = " . $submission_id;
-$paymentDetails = $wpdb->get_results($query);
+$query = "SELECT * FROM " . $wpdb->prefix . "submission_payment_details where submission_id = " . $submission_id;
+$payment_details = $wpdb->get_results($query);
 
-$paymentDetailLow;
-$paymentDetailHigh;
-if (count($paymentDetails) > 0) {
-    foreach($paymentDetails as $key => $value){
-        if ($value->btw_type == 1) {
-            $paymentDetailLow = $value;
-        } else if ($value->btw_type == 2) {
-            $paymentDetailHigh = $value;
-        }
-    }
-}
-
-$query = "SELECT * FROM " . $wpdb->prefix . "submission_participants where invoice_id = " . $submission_id;
+$query = "SELECT * FROM " . $wpdb->prefix . "submission_participants where submission_id = " . $submission_id;
 $participants = $wpdb->get_results($query);
 
 $query = "SELECT * FROM " . $wpdb->prefix . "submission_settings where preset = 1";
 $settings = $wpdb->get_results($query);
-
-$ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_price_group : $settings[0]->ticket_price_single);
 ?>
 
 <div class="container">
@@ -396,11 +382,18 @@ $ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_p
 
         <div class="naw">
             <ul>
+                <li><b><?php echo $invoice[0]->extra_information; ?></b></li>
+                <li>T.a.v. <?php echo ucfirst($invoice[0]->firstname); ?> <?php echo ucfirst($invoice[0]->lastname); ?></li>
+                <li><?php echo ucfirst($invoice[0]->adress); ?></li>
+                <li><?php echo $invoice[0]->zipcode; ?> <?php echo ucfirst($invoice[0]->city); ?></li>
+                <li>Nederland</li>
+                <!--
                 <li><b>{Organisatie:16}</b></li>
                 <li>T.a.v. {T.a.v. (Voornaam):17.3} {T.a.v. (Achternaam):17.6}</li>
                 <li>{Adres (Straat + huisnummer):18.1}</li>
                 <li>{Adres (Postcode):18.3} {Adres (Plaats):18.5}</li>
                 <li>{Adres (Land):18.6}</li>
+                -->
             </ul>
         </div>
         <div class="logo">
@@ -415,7 +408,7 @@ $ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_p
             <ul>
                 <li>
                     <div class="general-label"><b>Factuurnummer</b></div>
-                    <div class="general-value"><?php echo $results[0]->invoice_number; ?></div>
+                    <div class="general-value"><?php echo $invoice[0]->number; ?></div>
                 </li>
                 <!--
                 <li>
@@ -424,7 +417,7 @@ $ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_p
                 </li> -->
                 <li>
                     <div class="general-label"><b>Uw referentie</b></div>
-                    <div class="general-value"><?php echo $results[0]->invoice_extra_information; ?></div>
+                    <div class="general-value"><?php echo $invoice[0]->extra_information; ?></div>
                 </li>
             </ul>
         </div>
@@ -432,11 +425,11 @@ $ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_p
             <ul>
                 <li>
                     <div class="general-label"><b>Factuurdatum</b></div>
-                    <div class="general-value"><?php echo $results[0]->submission_date ?></div>
+                    <div class="general-value"><?php echo $invoice[0]->date ?></div>
                 </li>
                 <li>
                     <div class="general-label"><b>Vervaldatum</b></div>
-                    <div class="general-value"><?php echo $results[0]->expiration_date  ?></div>
+                    <div class="general-value"><?php echo $invoice[0]->expiration_date  ?></div>
                 </li>
             </ul>
         </div>
@@ -452,28 +445,27 @@ $ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_p
                 <th>Totaalbedrag</th>
             </tr>
             <tr>
-                <td>Deelname Het Grootste Kennisfestival 2018
-                </td>
+                <td>Deelname Het Grootste Kennisfestival 2018</td>
                 <td align="right"><?php echo count($participants)?>,00</td>
-                <td align="right">€ <?php echo number_format(($ticketPrice - $settings[0]->food_price) * count($participants), 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->entry_fee ?></td>
                 <td align="right">21 %</td>
-                <td align="right">€ <?php echo number_format(((($ticketPrice - $settings[0]->food_price) * count($participants)) + ((($ticketPrice -$settings[0]->food_price) * count($participants)) * $settings[0]->btw_high)), 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->entry_fee_btw ?></td>
             </tr>
             <tr>
                 <td>Lekker eten en drinken
                 </td>
                 <td align="right"><?php echo count($participants)?>,00</td>
-                <td align="right">€ <?php echo number_format(($paymentDetailLow->price), 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->food_fee  ?></td>
                 <td align="right">6 %</td>
-                <td align="right">€ <?php echo number_format(($paymentDetailLow->price + $paymentDetailLow->tax), 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->food_fee_btw  ?></td>
             </tr>
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
                 <td>Parkeerticket</td>
                 <td align="right"><?php echo count($participants)?>,00</td>
-                <td align="right">€ <?php echo number_format($settings[0]->price_parkingticket , 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->parking_fee  ?></td>
                 <td align="right">21 %</td>
-                <td align="right">€ <?php echo number_format(($settings[0]->price_parkingticket * $settings[0]->btw_high), 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->parking_fee_btw  ?></td>
             </tr>
             [/gravityforms]
         </table>
@@ -483,19 +475,19 @@ $ticketPrice = ($results[0]->submission_type == 'groep' ? $settings[0]->ticket_p
         <table>
             <tr>
                 <td>Totaal exclusief BTW</td>
-                <td align="right">€ <?php echo number_format($results[0]->price, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->total  ?></td>
             </tr>
             <tr>
                 <td>BTW 21%</td>
-                <td align="right">€ <?php echo number_format($paymentDetailHigh->tax, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->total_high_btw  ?></td>
             </tr>
             <tr>
                 <td>BTW 6%</td>
-                <td align="right">€ <?php echo number_format($paymentDetailLow->tax, 2, ',', ''); ?></td>
+                <td align="right">€ <?php echo $payment_details[0]->total_low_btw  ?></td>
             </tr>
             <tr>
                 <th>Totaal te voldoen</th>
-                <th align="right">€ <?php echo number_format($results[0]->price_tax, 2, ',', ''); ?></th>
+                <th align="right">€ <?php echo $payment_details[0]->total_total  ?></th>
             </tr>
         </table>
     </div>

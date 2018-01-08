@@ -40,6 +40,15 @@ $dbPricePartHighTotal;
 $dbPricePartLowTotal;
 $dbPricePartLow;
 $dbPricePartLowBtw;
+$dbTicketPricePart;
+$dbTicketPricePartBtw;
+$dbTicketPricePartTotal;
+$dbParkingPricePart;
+$dbParkingPricePartBtw;
+$dbParkingPricePartTotal;
+$dbFoodPartPriceLow;
+$dbFoodPartPriceLowBtw;
+$dbFoodPartPriceLowTotal;
 
 $dbParticipants;
 
@@ -215,10 +224,10 @@ function processInvoiceNAWFields($entry)
     $dbInvoiceAdress = $entry['18.1'];
 
     global $dbInvoiceZipcode;
-    $dbInvoiceZipcode = $entry['18.3'];
+    $dbInvoiceZipcode = $entry['18.5'];
 
     global $dbInvoiceCity;
-    $dbInvoiceCity = $entry['18.5'];
+    $dbInvoiceCity = $entry['18.3'];
 
     global $dbInvoiceEmail;
     $dbInvoiceEmail = $entry['19'];
@@ -334,7 +343,8 @@ function processPaymentFields($entry)
 
     // Check for reduction and change the ticket price
     global $dbReductionCode;
-    $freeParkingTicket = false;
+    global $dbParkingTicketFree;
+    $dbParkingTicketFree = 0;
     if ($dbReductionCode && $dbReductionCode != '') {
         global $wpdb;
         $sql = "SELECT * FROM " . $wpdb->prefix . "submission_reduction_codes where code = '" . $dbReductionCode . "'";
@@ -342,12 +352,11 @@ function processPaymentFields($entry)
         $result = $wpdb->get_results($sql, 'ARRAY_A');
 
         global $price_parking_ticket;
+
         if (count($result) > 0) {
             $dbTicketPrice = $result[0]['ticket_price'];
 
             $freeParkingTicket = $result[0]['free_parking_ticket'] == 1 ? true : false;
-
-            global $dbParkingTicketFree;
             $dbParkingTicketFree = $result[0]['free_parking_ticket'];
 
             if ($freeParkingTicket) {
@@ -364,15 +373,21 @@ function processPaymentFields($entry)
     // Calculate high btw first substract the food (low btw) and split into parking ticket and ticket
     global $dbPricePartHigh;
     global $dbPricePartHighBtw;
+    global $dbTicketPricePart;
+    global $dbTicketPricePartBtw;
+    global $dbTicketPricePartTotal;
+    global $dbParkingPricePart;
+    global $dbParkingPricePartBtw;
+    global $dbParkingPricePartTotal;
     global $price_parking_ticket;
     global $btw_high;
 
-    $total_price_parkingtickets = 0;
+    $dbParkingPricePart = 0;
     if ($dbNumberParkingTickets > 0) {
         // Parking costs and btw
-        $total_price_parkingtickets = ($dbNumberParkingTickets * $price_parking_ticket);
-        $price_parkingtickets_btw = $total_price_parkingtickets  * $btw_high;
-        $price_parkingtickets_total = $total_price_parkingtickets  + $price_parkingtickets_btw;
+        $dbParkingPricePart = ($dbNumberParkingTickets * $price_parking_ticket);
+        $dbParkingPricePartBtw = $dbParkingPricePart  * $btw_high;
+        $dbParkingPricePartTotal = $dbParkingPricePart  + $dbParkingPricePartBtw;
     }
 
     global $food_price;
@@ -384,9 +399,11 @@ function processPaymentFields($entry)
     }
 
     global $dbParticipants;
-    $participants_price_tickets = $price_ticket_ex_food * count($dbParticipants);
+    $dbTicketPricePart = $price_ticket_ex_food * count($dbParticipants);
+    $dbTicketPricePartBtw = $dbTicketPricePart * $btw_high;
+    $dbTicketPricePartTotal = $dbTicketPricePart + $dbTicketPricePartBtw;
 
-    $dbPricePartHigh = $participants_price_tickets + $total_price_parkingtickets ;
+    $dbPricePartHigh = $dbTicketPricePart + $dbParkingPricePart ;
     $dbPricePartHighBtw = $dbPricePartHigh * $btw_high;
 
     global $dbPricePartHighTotal;
@@ -402,17 +419,24 @@ function processPaymentFields($entry)
 
     global $dbPricePartLowBtw;
     global $dbPricePartLowTotal;
+    global $dbFoodPartPriceLow;
+    global $dbFoodPartPriceLowBtw;
+    global $dbFoodPartPriceLowTotal;
+
     global $btw_low;
 
     $dbPricePartLow = count($dbParticipants) * $dbPricePartLow;
+    $dbFoodPartPriceLow = $dbPricePartLow;
     $dbPricePartLowBtw = $dbPricePartLow * $btw_low;
+    $dbFoodPartPriceLowBtw = $dbPricePartLowBtw;
     $dbPricePartLowTotal = $dbPricePartLow + $dbPricePartLowBtw;
+    $dbFoodPartPriceLowTotal = $dbPricePartLowTotal;
 
     // Payment details
     global $dbTotalBtw;
     $dbTotalBtw = $dbPricePartLowBtw + $dbPricePartHighBtw;
     global $dbTotalPrice;
-    $dbTotalPrice = ($dbTicketPrice * count($dbParticipants)) + $total_price_parkingtickets;
+    $dbTotalPrice = ($dbTicketPrice * count($dbParticipants)) + $dbParkingPricePart;
 
     $rounded_total_price = number_format($dbTotalPrice * 100, 0, ',', '');
     $rounded_btw_part_low = number_format(($dbPricePartLowBtw) * 100, 0, ',', '');
@@ -453,41 +477,94 @@ function saveSubmission()
     global $dbTotalPrice;
     global $dbTotalBtw;
     global $dbParkingTicketFree;
+    global $dbPricePartLowBtw;
+    global $dbPricePartLow;
+    global $dbPricePartLowTotal;
+    global $dbPricePartHighTotal;
+    global $dbPricePartHigh;
+    global $dbPricePartHighBtw;
+    global $dbTicketPricePart;
+    global $dbTicketPricePartBtw;
+    global $dbTicketPricePartTotal;
+    global $dbParkingPricePart;
+    global $dbParkingPricePartBtw;
+    global $dbParkingPricePartTotal;
+    global $dbFoodPartPriceLow;
+    global $dbFoodPartPriceLowBtw;
+    global $dbFoodPartPriceLowTotal;
 
     global $wpdb;
 
-    debug_to_console('Table: ' . db_submission_table);
+    debug_to_console('Reduction code: ' . $dbParkingTicketFree);
+    debug_to_console('Insert into table: ' . db_submission_table);
     $wpdb->insert(db_submission_table,
         array(
             'submission_id' => $dbSubmissionId,
-            'invoice_debiteur_nr' => $dbInvoiceDebiteurNr,
-            'invoice_number' => $dbInvoiceNumber,
-            'invoice_book_nr' => $dbInvoiceBookNr,
-            'invoice_cost_post' => $dbInvoiceCostPost,
-            'invoice_description' => $dbInvoiceDescription,
-            'invoice_row_description' => $dbInvoiceRowDescription,
-            'invoice_follow_nr' => $dbInvoiceFollowNumber,
             'submission_type' => $dbSubmissionType,
             'submission_date' => $dbSubmissionDate,
-            'invoice_expiration_days' => $dbInvoiceExpirationDays,
             'expiration_date' => $dbExpirationDate,
             'organization' => $dbSubmissionOrganization,
-            'invoice_firstname' => $dbInvoiceFirstName,
-            'invoice_lastname' => $dbInvoiceLastName,
-            'invoice_adress' => $dbInvoiceAdress,
-            'invoice_zipcode' => $dbInvoiceZipcode,
-            'invoice_city' => $dbInvoiceCity,
-            'invoice_event_nr' => $dbInvoiceEventNr,
             'price' => $dbTotalPrice,
-            'invoice_btw_type' => $dbInvoiceBtwType,
             'tax' => $dbTotalBtw,
             'price_tax' => $dbTotalPriceBtw,
-            'invoice_email' => $dbInvoiceEmail,
-            'invoice_extra_information' => $dbInvoiceExtraInformation,
             'parking_tickets' => $dbNumberParkingTickets,
             'reduction_code' => $dbReductionCode,
             'reduction_code_free_parking_ticket' => $dbParkingTicketFree,
             'notes' => $dbNotes
+        )
+    );
+
+    debug_to_console('Inserted submission with id: ' . $dbSubmissionId);
+
+    debug_to_console('Insert into table: ' . $wpdb->prefix . 'submission_invoices');
+    $wpdb->insert($wpdb->prefix . 'submission_invoices',
+        array(
+            'submission_id' => $dbSubmissionId,
+            'debiteur_nr' => $dbInvoiceDebiteurNr,
+            'number' => $dbInvoiceNumber,
+            'book_nr' => $dbInvoiceBookNr,
+            'cost_post' => $dbInvoiceCostPost,
+            'description' => $dbInvoiceDescription,
+            'row_description' => $dbInvoiceRowDescription,
+            'follow_nr' => $dbInvoiceFollowNumber,
+            'expiration_days' => $dbInvoiceExpirationDays,
+            'firstname' => $dbInvoiceFirstName,
+            'lastname' => $dbInvoiceLastName,
+            'adress' => $dbInvoiceAdress,
+            'zipcode' => $dbInvoiceZipcode,
+            'city' => $dbInvoiceCity,
+            'event_nr' => $dbInvoiceEventNr,
+            'btw_type' => $dbInvoiceBtwType,
+            'email' => $dbInvoiceEmail,
+            'extra_information' => $dbInvoiceExtraInformation,
+            'date' => $dbSubmissionDate,
+            'expiration_date' => $dbExpirationDate
+        )
+    );
+
+    debug_to_console('Inserted invoice with submission id: ' . $dbSubmissionId);
+
+    $wpdb->insert($wpdb->prefix . 'submission_payment_details',
+        array(
+            'submission_id' => $dbSubmissionId,
+            'entry_fee' => $dbTicketPricePart,
+            'entry_fee_btw' => $dbTicketPricePartBtw,
+            'entry_fee_total' => $dbTicketPricePartTotal,
+            'parking_fee' => $dbParkingPricePart,
+            'parking_fee_btw' => $dbParkingPricePartBtw,
+            'parking_fee_total' => $dbParkingPricePartTotal,
+            'food_fee' => $dbFoodPartPriceLow,
+            'food_fee_btw' => $dbFoodPartPriceLowBtw,
+            'food_fee_total' => $dbFoodPartPriceLowTotal,
+            'total_low' => $dbPricePartLow,
+            'total_low_btw' => $dbPricePartLowBtw,
+            'total_low_total' => $dbPricePartLowTotal,
+            'total_high' => $dbPricePartHigh,
+            'total_high_btw' => $dbPricePartHighBtw,
+            'total_high_total' => $dbPricePartHighTotal,
+            'total' => $dbTotalPrice,
+            'total_btw' => $dbTotalBtw,
+            'total_total' => $dbTotalPriceBtw
         )
     );
 
@@ -501,7 +578,7 @@ function saveSubmission()
 
     $wpdb->insert($wpdb->prefix . 'submission_crm_details',
         array(
-            'invoice_id' => $dbSubmissionId,
+            'submission_id' => $dbSubmissionId,
             'event' => $payment_detail_event_nr_high_btw,
             'price' => $dbPricePartHigh,
             'btw_type' => $btw_high_nr,
@@ -524,7 +601,7 @@ function saveSubmission()
 
     $wpdb->insert($wpdb->prefix . 'submission_crm_details',
         array(
-            'invoice_id' => $dbSubmissionId,
+            'submission_id' => $dbSubmissionId,
             'event' => $payment_detail_event_nr_low_btw,
             'price' => $dbPricePartLow,
             'btw_type' => $btw_low_nr,
@@ -541,7 +618,7 @@ function saveSubmission()
     foreach ($dbParticipants as $part) {
         $wpdb->insert($wpdb->prefix . 'submission_participants',
             array(
-                'invoice_id' => $dbSubmissionId,
+                'submission_id' => $dbSubmissionId,
                 'name' => $part['Naam'],
                 'email' => $part['E-mailadres']
             )

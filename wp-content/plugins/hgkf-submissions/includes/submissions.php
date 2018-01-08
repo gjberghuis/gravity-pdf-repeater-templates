@@ -16,7 +16,7 @@ class My_submission_list extends WP_List_Table
     function column_default($item, $column_name)
     {
         switch ($column_name) {
-            case 'invoice_number':
+            case 'number':
             case 'active':
             case 'submission_type':
             case 'submission_date':
@@ -99,7 +99,7 @@ class My_submission_list extends WP_List_Table
     {
         $columns = array(
             'cb' => '<input type="checkbox" />',
-            'invoice_number' => __('Factuur nummer', 'mylisttable'),
+            'number' => __('Factuur nummer', 'mylisttable'),
             'active' => __('Negeren in export', 'mylisttable'),
             'submission_type' => __('Type aanmelding', 'mylisttable'),
             'submission_date' => __('Inzend datum', 'mylisttable'),

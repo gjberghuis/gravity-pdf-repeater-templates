@@ -37,7 +37,7 @@ class reduction_codes extends WP_List_Table
     {
         global $wpdb;
 
-        $sql = "SELECT * FROM {$wpdb->prefix}submissions_reduction_codes";
+        $sql = "SELECT * FROM {$wpdb->prefix}submission_reduction_codes";
         if (!empty($_REQUEST['orderby'])) {
             $sql .= ' ORDER BY ' . esc_sql($_REQUEST['orderby']);
             $sql .= !empty($_REQUEST['order']) ? ' ' . esc_sql($_REQUEST['order']) : ' ASC';

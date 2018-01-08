@@ -99,7 +99,7 @@ function render_reduction_codes_page()
         global $wpdb;
 
         $id = $_GET['id'];
-        $result = $wpdb->delete( 'word1_submissions_reduction_codes', array( 'id' => $id), array( '%s', '%s' ) );
+        $result = $wpdb->delete( 'word1_submission_reduction_codes', array( 'id' => $id), array( '%s', '%s' ) );
 
         if ($result > 0) {
             $path = 'admin.php?page=reduction_codes';
@@ -141,7 +141,7 @@ function render_add_reduction_code_page() {
 
         global $wpdb;
 
-        $result = $wpdb->insert( 'word1_submissions_reduction_codes', array( 'ticket_price' => $ticketPrice, 'code' => $code, 'description' => $description), array( '%s', '%s' ) );
+        $result = $wpdb->insert( 'word1_submission_reduction_codes', array( 'ticket_price' => $ticketPrice, 'code' => $code, 'description' => $description), array( '%s', '%s' ) );
 
         if ($result > 0) {
             $path = 'admin.php?page=reduction_codes';
@@ -200,7 +200,7 @@ function render_edit_reduction_code_page() {
     global $wpdb;
 
     if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
-        $reductionCode = $wpdb->get_results("SELECT * FROM word1_submissions_reduction_codes WHERE id = " . $_GET['id']);
+        $reductionCode = $wpdb->get_results("SELECT * FROM word1_submission_reduction_codes WHERE id = " . $_GET['id']);
 
         if (count($reductionCode) > 0) {
             if (isset($_POST['save_reduction_code'])) {
@@ -222,7 +222,7 @@ function render_edit_reduction_code_page() {
                     $reductionCode[0]->description = $_POST['description'];
                 }
 
-                $result = $wpdb->update('word1_submissions_reduction_codes',
+                $result = $wpdb->update('word1_submission_reduction_codes',
                     array('ticket_price' => $reductionCode[0]->ticket_price,
                         'free_parking_ticket' => $reductionCode[0]->free_parking_ticket,
                         'code' => $reductionCode[0]->code,

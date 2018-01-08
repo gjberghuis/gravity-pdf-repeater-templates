@@ -337,7 +337,7 @@ function processPaymentFields($entry)
     $freeParkingTicket = false;
     if ($dbReductionCode && $dbReductionCode != '') {
         global $wpdb;
-        $sql = "SELECT * FROM " . $wpdb->prefix . "submissions_reduction_codes where code = '" . $dbReductionCode . "'";
+        $sql = "SELECT * FROM " . $wpdb->prefix . "submission_reduction_codes where code = '" . $dbReductionCode . "'";
 
         $result = $wpdb->get_results($sql, 'ARRAY_A');
 

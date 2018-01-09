@@ -24,6 +24,11 @@ class My_submission_list extends WP_List_Table
             case 'organization':
             case 'firstname':
             case 'lastname':
+            case 'adress':
+            case 'zipcode':
+            case 'city':
+            case 'extra_information':
+            case 'email':
             case 'price':
             case 'price_tax':
             case 'parking_tickets':
@@ -161,6 +166,11 @@ class My_submission_list extends WP_List_Table
             'organization' => __('Organisatie', 'mylisttable'),
             'firstname' => __('Voornaam', 'mylisttable'),
             'lastname' => __('Achternaam', 'mylisttable'),
+            'adress' => __('Adres', 'mylisttable'),
+            'zipcode' => __('Postcode', 'mylisttable'),
+            'city' => __('Plaats', 'mylisttable'),
+            'email' => __('Email', 'mylisttable'),
+            'extra_information' => __('Extra informatie', 'mylisttable'),
             'price' => __('Prijs excl. Btw', 'mylisttable'),
             'price_tax' => __('Prijs incl. Btw', 'mylisttable'),
             'parking_tickets' => __('Parkeertickets', 'mylisttable'),
@@ -249,7 +259,9 @@ class My_submission_list extends WP_List_Table
     public static function get_submissions($per_page = 5, $page_number = 1)
     {
         global $wpdb;
-        $sql = "SELECT submission.id, invoice.submission_id, invoice.number, submission.active, submission.submission_type, submission.submission_date, submission.organization, invoice.firstname, invoice.lastname, submission.price, submission.price_tax, submission.parking_tickets, submission.reduction_code, submission.notes FROM {$wpdb->prefix}submissions AS submission INNER JOIN {$wpdb->prefix}submission_invoices AS invoice ON invoice.submission_id = submission.submission_id";
+        $sql = "SELECT submission.id, invoice.submission_id, invoice.number, submission.active, submission.submission_type, submission.submission_date, 
+submission.organization, invoice.firstname, invoice.lastname, submission.price, submission.price_tax, submission.parking_tickets, submission.reduction_code, 
+submission.notes, invoice.adress, invoice.zipcode, invoice.city, invoice.email, invoice.extra_information FROM {$wpdb->prefix}submissions AS submission INNER JOIN {$wpdb->prefix}submission_invoices AS invoice ON invoice.submission_id = submission.submission_id";
 
         if (!empty($_REQUEST['orderby'])) {
             $sql .= ' ORDER BY ' . esc_sql($_REQUEST['orderby']);

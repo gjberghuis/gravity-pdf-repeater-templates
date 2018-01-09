@@ -42,8 +42,11 @@ class My_submission_list extends WP_List_Table
 
     function column_submission_id($item)
     {
+        $path = 'admin.php?page=edit_submission';
+        $editUrl = admin_url($path);
+
         $actions = array(
-            'bewerken' => sprintf('<a href="?page=%s&action=%s&submission=%s">Bewerken</a>', $_REQUEST['page'], 'edit', $item['id'])
+            'bewerken' => sprintf('<a href="%s&action=%s&id=%s">Bewerken</a>', $editUrl, 'edit_submission', $item['id'])
         );
 
         return sprintf('%1$s %2$s', $item['submission_id'], $this->row_actions($actions));

@@ -14,6 +14,7 @@ if (!class_exists('WP_List_Table')) {
 
 require_once('includes/settings.php');
 require_once('includes/submissions.php');
+require_once('includes/edit-submission.php');
 require_once('includes/reductions-codes.php');
 require_once('includes/process-gravity-entry');
 
@@ -22,6 +23,7 @@ $submissionCollection = [];
 function my_add_menu_items()
 {
     $hookSubmissions = add_menu_page('Aanmeldingen', 'Aanmeldingen', 'manage_options', 'my_submissions_overview', 'render_submissions_overview_page');
+    add_submenu_page(null, 'Aanmelding bewerken', 'Aanmelding bewerken', 'manage_options', 'edit_submission', 'render_edit_submission_page');
     add_submenu_page('my_submissions_overview', 'Kortingscodes', 'Kortingscodes', 'manage_options', 'reduction_codes', 'render_reduction_codes_page');
     add_submenu_page(null, 'Kortingscode toevoegen', 'Kortingscode toevoegen', 'manage_options', 'add_reduction_code', 'render_add_reduction_code_page');
     add_submenu_page(null, 'Kortingscode bewerken', 'Kortingscode bewerken', 'manage_options', 'edit_reduction_code', 'render_edit_reduction_code_page');
@@ -36,12 +38,12 @@ function add_options_submissions()
     $option = 'per_page';
     $args = array(
         'label' => 'Aanmeldingen',
-        'default' => 5,
+        'default' => 10,
         'option' => 'submissions_per_page'
     );
     add_screen_option($option, $args);
 
-    $myListTable = new My_submission_list();
+    $myListTable = new My_submission_list;
 }
 
 add_action('admin_menu', 'my_add_menu_items');
@@ -220,7 +222,7 @@ function render_add_reduction_code_page() {
 function render_edit_reduction_code_page() {
     global $wpdb;
 
-    if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
+    if (isset($_GET['action']) && $_GET['action'] == 'edit_reduction_code' && isset($_GET['id'])) {
         $reductionCode = $wpdb->get_results("SELECT * FROM word1_submission_reduction_codes WHERE id = " . $_GET['id']);
 
         if (count($reductionCode) > 0) {

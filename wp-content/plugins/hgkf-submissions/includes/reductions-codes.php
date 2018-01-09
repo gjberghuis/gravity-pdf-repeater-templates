@@ -56,7 +56,7 @@ class reduction_codes extends WP_List_Table
         $editUrl = admin_url($path);
 
         $actions = array(
-            'edit'      => sprintf('<a href="%s&action=%s&id=%s">Edit</a>',$editUrl,'edit',$item['id']),
+            'edit'      => sprintf('<a href="%s&action=%s&id=%s">Edit</a>',$editUrl,'edit_reduction_code',$item['id']),
             'delete'    => sprintf('<a href="?page=%s&action=%s&id=%s">Delete</a>',$_REQUEST['page'],'delete',$item['id']),
         );
 

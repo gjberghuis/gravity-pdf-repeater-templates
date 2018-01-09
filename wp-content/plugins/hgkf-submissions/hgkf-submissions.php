@@ -54,8 +54,9 @@ function render_submissions_overview_page()
 
     global $myListTable;
     echo '</pre><div class="wrap"><h2>Aanmeldingen overzicht</h2>';
-    $myListTable->prepare_items();
-    echo '<form action="" method="post">';
+
+    echo '<form id="date" name="date" action="" method="post">';
+        echo '<input type="hidden" name="page" value="<?php echo $_REQUEST[\'page\'] ?>" />';
         echo '<table>';
             echo '<tr>';
             echo '<td>';
@@ -86,7 +87,14 @@ function render_submissions_overview_page()
     ?>
 
     <?php
-    $myListTable->display();
+
+    echo '<form action="" method="post" id="Submission" name="submissions">';
+    echo '<input type="hidden" name="page" value="' . $_REQUEST['page'] . '">';
+        $myListTable->prepare_items();
+        $myListTable->search_box('zoeken', 'search');
+        $myListTable->display();
+
+    echo '</form>';
     echo '</div>';
 }
 

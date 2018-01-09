@@ -16,6 +16,7 @@ class My_submission_list extends WP_List_Table
     function column_default($item, $column_name)
     {
         switch ($column_name) {
+            case 'submission_id':
             case 'number':
             case 'active':
             case 'submission_type':
@@ -39,6 +40,15 @@ class My_submission_list extends WP_List_Table
         _e('Geen aanmeldingen gevonden.');
     }
 
+    function column_submission_id($item)
+    {
+        $actions = array(
+            'bewerken' => sprintf('<a href="?page=%s&action=%s&submission=%s">Bewerken</a>', $_REQUEST['page'], 'edit', $item['id'])
+        );
+
+        return sprintf('%1$s %2$s', $item['submission_id'], $this->row_actions($actions));
+    }
+
     function column_active($item)
     {
         $actions = array(
@@ -48,6 +58,12 @@ class My_submission_list extends WP_List_Table
         return sprintf('%1$s %2$s', $item['active'], $this->row_actions($actions));
     }
 
+    function column_cb($item) {
+        return sprintf(
+            '<input type="checkbox" name="submission[]" value="%s" />', $item['id']
+        );
+    }
+
     function admin_header()
     {
         $page = (isset($_GET['page'])) ? esc_attr($_GET['page']) : false;
@@ -55,10 +71,24 @@ class My_submission_list extends WP_List_Table
             return;
         echo '<style type="text/css">';
         echo '.wp-list-table .column-id { width: 5%; }';
-        //  echo '.wp-list-table .column-invoice_number { width: 40%; }';
-        //  echo '.wp-list-table .column-submission_type { width: 35%; }';
-        // echo '.wp-list-table .column-submission_date { width: 20%;}';
+        echo '.wp-list-table .column-submission_id { width:80px !important; }';
+        echo '.wp-list-table .column-active { width:80px !important; }';
+        echo '.wp-list-table .column-notes { width:200px !important; }';
         echo '</style>';
+    }
+
+    /**
+     * Returns an associative array containing the bulk action
+     *
+     * @return array
+     */
+    public function get_bulk_actions()
+    {
+        $actions = [
+            'bulk-active' => 'Exportstatus veranderen'
+        ];
+
+        return $actions;
     }
 
     function usort_reorder($a, $b)
@@ -75,14 +105,16 @@ class My_submission_list extends WP_List_Table
 
     function prepare_items()
     {
+        // check if a search was performed.
+        $user_search_key = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
+
+        echo $user_search_key;
+
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
 
         $this->_column_headers = array($columns, $hidden, $sortable);
-
-        /** Process bulk action */
-        $this->process_bulk_action();
 
         $per_page = $this->get_items_per_page('submissions_per_page', 10);
         $current_page = $this->get_pagenum();
@@ -93,12 +125,32 @@ class My_submission_list extends WP_List_Table
             'per_page' => $per_page                     //WE have to determine how many items to show on a page
         ));
         $this->items = self::get_submissions($per_page, $current_page);
+
+        if( $user_search_key ) {
+            $this->items = $this->filter_table_data($this->items, $user_search_key );
+        }
+        /** Process bulk action */
+        $this->process_bulk_action();
+    }
+
+
+// filter the table data based on the search key
+    public function filter_table_data( $table_data, $search_key ) {
+        $filtered_table_data = array_values( array_filter( $table_data, function( $row ) use( $search_key ) {
+            foreach( $row as $row_val ) {
+                if( stripos( $row_val, $search_key ) !== false ) {
+                    return true;
+                }
+            }
+        } ) );
+        return $filtered_table_data;
     }
 
     function get_columns()
     {
         $columns = array(
             'cb' => '<input type="checkbox" />',
+            'submission_id' => __('Nummer', 'mylisttable'),
             'number' => __('Factuur nummer', 'mylisttable'),
             'active' => __('Negeren in export', 'mylisttable'),
             'submission_type' => __('Type aanmelding', 'mylisttable'),
@@ -118,7 +170,8 @@ class My_submission_list extends WP_List_Table
     function get_sortable_columns()
     {
         $sortable_columns = array(
-            'invoice_number' => array('invoice_number', false),
+            'submission_id' => array('submission_id', false),
+            'number' => array('number', false),
             'submission_type' => array('submission_type', false),
             'submission_date' => array('submission_date', false)
         );
@@ -127,10 +180,7 @@ class My_submission_list extends WP_List_Table
 
     public function process_bulk_action()
     {
-
-//Detect when a bulk action is being triggered...
         if ('active' === $this->current_action()) {
-
 // In our file that handles the request, verify the nonce.
             $nonce = esc_attr($_REQUEST['_wpnonce']);
 
@@ -140,14 +190,10 @@ class My_submission_list extends WP_List_Table
             exit;
         }
 
-// If the delete bulk action is triggered
         if ((isset($_POST['action']) && $_POST['action'] == 'bulk-active')
             || (isset($_POST['action2']) && $_POST['action2'] == 'bulk-active')
         ) {
-
-            $delete_ids = esc_sql($_POST['bulk-active']);
-
-// loop over the array of record IDs and delete them
+            $delete_ids = esc_sql($_POST['submission']);
             foreach ($delete_ids as $id) {
                 self::change_active_submission($id);
 
@@ -172,7 +218,6 @@ class My_submission_list extends WP_List_Table
         if ($results[0]->active == 1) {
             $newStatus = 0;
         }
-
         $wpdb->query("UPDATE {$wpdb->prefix}submissions SET active=" . $newStatus . " WHERE id = " . $id);
     }
 
@@ -201,7 +246,7 @@ class My_submission_list extends WP_List_Table
     public static function get_submissions($per_page = 5, $page_number = 1)
     {
         global $wpdb;
-        $sql = "SELECT invoice.number, submission.active, submission.submission_type, submission.submission_date, submission.organization, invoice.firstname, invoice.lastname, submission.price, submission.price_tax, submission.parking_tickets, submission.reduction_code, submission.notes FROM {$wpdb->prefix}submissions AS submission INNER JOIN {$wpdb->prefix}submission_invoices AS invoice ON invoice.submission_id = submission.submission_id";
+        $sql = "SELECT submission.id, invoice.submission_id, invoice.number, submission.active, submission.submission_type, submission.submission_date, submission.organization, invoice.firstname, invoice.lastname, submission.price, submission.price_tax, submission.parking_tickets, submission.reduction_code, submission.notes FROM {$wpdb->prefix}submissions AS submission INNER JOIN {$wpdb->prefix}submission_invoices AS invoice ON invoice.submission_id = submission.submission_id";
 
         if (!empty($_REQUEST['orderby'])) {
             $sql .= ' ORDER BY ' . esc_sql($_REQUEST['orderby']);

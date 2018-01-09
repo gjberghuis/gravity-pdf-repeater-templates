@@ -353,20 +353,12 @@ function processPaymentFields($entry)
 
         $result = $wpdb->get_results($sql, 'ARRAY_A');
 
-        global $price_parking_ticket;
+        // Check for free parking ticket in the reduction code
+        $freeParkingTicket = $result[0]['free_parking_ticket'] == 1 ? true : false;
+        $dbParkingTicketFree = $result[0]['free_parking_ticket'];
 
         if (count($result) > 0) {
             $dbTicketPrice = $result[0]['ticket_price'];
-
-            $freeParkingTicket = $result[0]['free_parking_ticket'] == 1 ? true : false;
-            $dbParkingTicketFree = $result[0]['free_parking_ticket'];
-
-            if ($freeParkingTicket) {
-                $dbTicketPrice = $dbTicketPrice - $price_parking_ticket;
-                if ($dbTicketPrice < 0 ) {
-                    $dbTicketPrice = 0;
-                }
-            }
         }
     }
 
@@ -386,10 +378,18 @@ function processPaymentFields($entry)
 
     $dbParkingPricePart = 0;
     if ($dbNumberParkingTickets > 0) {
+        if ($freeParkingTicket ) {
+            $price_parking_ticket = 0;
+        }
+
         // Parking costs and btw
         $dbParkingPricePart = ($dbNumberParkingTickets * $price_parking_ticket);
         $dbParkingPricePartBtw = $dbParkingPricePart  * $btw_high;
         $dbParkingPricePartTotal = $dbParkingPricePart  + $dbParkingPricePartBtw;
+    } else {
+        $dbParkingPricePart = 0;
+        $dbParkingPricePartBtw = 0;
+        $dbParkingPricePartTotal = 0;
     }
 
     global $food_price;

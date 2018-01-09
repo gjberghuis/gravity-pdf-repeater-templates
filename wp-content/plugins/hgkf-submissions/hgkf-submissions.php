@@ -131,6 +131,13 @@ function render_add_reduction_code_page() {
             $code  = $_POST['code'];
         }
 
+        $freeParkingTicket = 0;
+        if (!empty($_POST['free_parking_ticket'])) {
+            $freeParkingTicket  = 1;
+        } else {
+            $freeParkingTicket = 0;
+        }
+
         $description = 0;
         if (!empty($_POST['description'])) {
             $description  = $_POST['description'];
@@ -138,7 +145,7 @@ function render_add_reduction_code_page() {
 
         global $wpdb;
 
-        $result = $wpdb->insert( 'word1_submission_reduction_codes', array( 'ticket_price' => $ticketPrice, 'code' => $code, 'description' => $description), array( '%s', '%s' ) );
+        $result = $wpdb->insert( 'word1_submission_reduction_codes', array( 'ticket_price' => $ticketPrice, 'code' => $code, 'free_parking_ticket' => $freeParkingTicket, 'description' => $description), array( '%s', '%s' ) );
 
         if ($result > 0) {
             $path = 'admin.php?page=reduction_codes';
@@ -173,6 +180,15 @@ function render_add_reduction_code_page() {
     echo '</td>';
     echo '<td>';
     echo '<input type="text" style="width:600px;" name="code" />';
+    echo '</td>';
+    echo '</tr>';
+    echo '<tr><td><br/></td></tr>';
+    echo '<tr>';
+    echo '<td>';
+    echo '<label for="description" style="margin-right: 20px;">Gratis parkeerticket</label>';
+    echo '</td>';
+    echo '<td>';
+    echo '<input type="checkbox" name="free_parking_ticket"/>';
     echo '</td>';
     echo '</tr>';
     echo '<tr><td><br/></td></tr>';

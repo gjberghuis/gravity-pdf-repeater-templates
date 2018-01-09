@@ -2,7 +2,7 @@
 
 class reduction_codes extends WP_List_Table
 {
-    function __construct($args)
+    function __construct()
     {
         global $status, $page;
         parent::__construct(array(

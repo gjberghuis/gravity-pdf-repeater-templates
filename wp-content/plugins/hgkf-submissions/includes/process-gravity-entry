@@ -256,6 +256,11 @@ function processInvoicePaymentFields($entry)
     global $dbInvoiceNumber;
     $dbInvoiceNumber = $invoice_cost_post . $dbInvoiceFollowNumber;
 
+    global $dbInvoiceFileName;
+    global $dbSubmissionOrganization;
+    global $dbInvoiceLastName;
+    $dbInvoiceFileName = date('Ymd') . '_' . $dbInvoiceNumber . '_' . (!empty($dbSubmissionOrganization) ? $dbSubmissionOrganization : $dbInvoiceLastName);
+
     global $dbInvoiceDebiteurNr;
     $dbInvoiceDebiteurNr = $invoice_count + 1600;
 
@@ -467,6 +472,7 @@ function saveSubmission()
     global $dbInvoiceExtraInformation;
     global $dbInvoiceEventNr;
     global $dbInvoiceNumber;
+    global $dbInvoiceFileName;
     global $dbInvoiceDebiteurNr;
     global $dbInvoiceBookNr;
     global $dbInvoiceCostPost;
@@ -527,6 +533,7 @@ function saveSubmission()
             'submission_id' => $dbSubmissionId,
             'debiteur_nr' => $dbInvoiceDebiteurNr,
             'number' => $dbInvoiceNumber,
+            'filename' => $dbInvoiceFileName,
             'book_nr' => $dbInvoiceBookNr,
             'cost_post' => $dbInvoiceCostPost,
             'description' => $dbInvoiceDescription,

@@ -199,7 +199,10 @@ function processSubmission($entry)
 
     global $dbReductionCode;
     if (!empty($entry[21])) {
-        $dbReductionCode = strtolower(trim($entry[21]));
+        $reductionCode = $entry[21];
+        $reductionCode = str_replace('"', "", $reductionCode);
+        $reductionCode = str_replace("'", "", $reductionCode);
+        $dbReductionCode = strtolower(trim($reductionCode));
     } else {
         $dbReductionCode = '';
     }

@@ -305,25 +305,27 @@ function processParticipants($entry, $form) {
         }
     }
 
-    foreach ($usEntry as $keyOneEntry => $oneEntry) {
-        $participant = array();
-        // MATCH UP THE FIELDS AND INPUTS
-        $singleRepeat = '';
-        foreach ($form[fields] as $key => $formField) {
-            $fieldId = $formField[id];
-            if (array_key_exists($fieldId, $oneEntry)) {
-                $singleInput = implode(" ", $oneEntry[$fieldId]);
-                // Only include inputs that aren't empty
-                if (!empty($singleInput)) {
-                    $participant[$formField[label]] = $singleInput;
-                    $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
+    if(is_array($usEntry) || is_object($usEntry)) {
+        foreach ($usEntry as $keyOneEntry => $oneEntry) {
+            $participant = array();
+            // MATCH UP THE FIELDS AND INPUTS
+            $singleRepeat = '';
+            foreach ($form[fields] as $key => $formField) {
+                $fieldId = $formField[id];
+                if (array_key_exists($fieldId, $oneEntry)) {
+                    $singleInput = implode(" ", $oneEntry[$fieldId]);
+                    // Only include inputs that aren't empty
+                    if (!empty($singleInput)) {
+                        $participant[$formField[label]] = $singleInput;
+                        $singleRepeat .= $formField[label] . ": " . $singleInput . ", ";
+                    }
                 }
             }
-        }
-        $dbParticipants[] = $participant;
+            $dbParticipants[] = $participant;
 
-        array_push($repeats, $singleRepeat);
-        unset($singleRepeat);
+         //   array_push($repeats, $singleRepeat);
+            unset($singleRepeat);
+        }
     }
 }
 

@@ -86,7 +86,7 @@
         echo '<label for="payment_detail_description_low_btw" style="margin-right: 20px;">Exact: beschrijving laag btw</label>';
         echo '</td>';
         echo '<td>';
-        echo '<input type="text" style="width: 100px;"  value="' . $settings[0]->payment_detail_description_low_btw . '" name="payment_detail_description_low_btw" />';
+        echo '<input type="text" style="width: 600px;"  value="' . $settings[0]->payment_detail_description_low_btw . '" name="payment_detail_description_low_btw" />';
         echo '</td>';
         echo '</tr>';
 
@@ -95,7 +95,7 @@
         echo '<label for="payment_detail_description_high_btw" style="margin-right: 20px;">Exact: beschrijving hoog btw</label>';
         echo '</td>';
         echo '<td>';
-        echo '<input type="text" style="width: 100px;"  value="' . $settings[0]->payment_detail_description_high_btw . '"  name="payment_detail_description_high_btw" />';
+        echo '<input type="text" style="width: 600px;"  value="' . $settings[0]->payment_detail_description_high_btw . '"  name="payment_detail_description_high_btw" />';
         echo '</td>';
         echo '</tr>';
 

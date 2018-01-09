@@ -138,7 +138,7 @@ function processSettings(){
     $dbInvoiceDescriptionText = "Wij verzoeken je vriendelijk dit bedrag binnen 14 dagen over te maken naar de Rabobank op rekeningnummer NL93RABO0300479743 ten name van Regio Academy BV onder vermelding van het factuurnummer. Mocht je vragen hebben naar aanleiding van deze factuur dan kan je een mail sturen naar administratie@regioacademy.nl. Dan nemen we zo snel mogelijk contact met je op.";
 
     global $wpdb;
-    $settings = $wpdb->get_results("SELECT * FROM " . db_submission_table . "_settings where preset = 1");
+    $settings = $wpdb->get_results("SELECT * FROM word1_submission_settings where preset = 1");
 
     if($settings && $settings[0]) {
         $price_single_ticket = $settings[0]->ticket_price_single;

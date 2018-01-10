@@ -4,7 +4,7 @@ function render_edit_submission_page() {
     global $wpdb;
 
     if (isset($_GET['action']) && $_GET['action'] == 'edit_submission' && isset($_GET['id'])) {
-        $submission = $wpdb->get_results("SELECT * FROM word1_submissions WHERE id = " . $_GET['id']);
+        $submission = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}submissions WHERE id = " . $_GET['id']);
 
         global $wpdb;
 
@@ -64,13 +64,13 @@ submission.organization, invoice.firstname, invoice.lastname, invoice.adress, in
                     $submission[0]["extra_information"] = $_POST['extra_information'];
                 }
 
-                $resultSubmission = $wpdb->update('word1_submissions',
+                $resultSubmission = $wpdb->update($wpdb->prefix . 'submissions',
                     array('organization' => $submission[0]["organization"],
                         'parking_tickets' => $submission[0]["parking_tickets"],
                         'notes' => $submission[0]["notes"]),
                     array('id' => $submission[0]["id"]));
 
-                $result = $wpdb->update('word1_submission_invoices',
+                $result = $wpdb->update($wpdb->prefix .'submission_invoices',
                     array('firstname' => $submission[0]["firstname"],
                         'lastname' => $submission[0]["lastname"],
                         'adress' => $submission[0]["adress"],

@@ -106,7 +106,7 @@ function render_reduction_codes_page()
         global $wpdb;
 
         $id = $_GET['id'];
-        $result = $wpdb->delete( 'word1_submission_reduction_codes', array( 'id' => $id), array( '%s', '%s' ) );
+        $result = $wpdb->delete($wpdb->prefix . 'submission_reduction_codes', array( 'id' => $id), array( '%s', '%s' ) );
 
         if ($result > 0) {
             $path = 'admin.php?page=reduction_codes';
@@ -155,7 +155,7 @@ function render_add_reduction_code_page() {
 
         global $wpdb;
 
-        $result = $wpdb->insert( 'word1_submission_reduction_codes', array( 'ticket_price' => $ticketPrice, 'code' => $code, 'free_parking_ticket' => $freeParkingTicket, 'description' => $description), array( '%s', '%s' ) );
+        $result = $wpdb->insert($wpdb->prefix .'submission_reduction_codes', array( 'ticket_price' => $ticketPrice, 'code' => $code, 'free_parking_ticket' => $freeParkingTicket, 'description' => $description), array( '%s', '%s' ) );
 
         if ($result > 0) {
             $path = 'admin.php?page=reduction_codes';
@@ -223,7 +223,7 @@ function render_edit_reduction_code_page() {
     global $wpdb;
 
     if (isset($_GET['action']) && $_GET['action'] == 'edit_reduction_code' && isset($_GET['id'])) {
-        $reductionCode = $wpdb->get_results("SELECT * FROM word1_submission_reduction_codes WHERE id = " . $_GET['id']);
+        $reductionCode = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}submission_reduction_codes WHERE id = " . $_GET['id']);
 
         if (count($reductionCode) > 0) {
             if (isset($_POST['save_reduction_code'])) {
@@ -245,7 +245,7 @@ function render_edit_reduction_code_page() {
                     $reductionCode[0]->description = $_POST['description'];
                 }
 
-                $result = $wpdb->update('word1_submission_reduction_codes',
+                $result = $wpdb->update($wpdb->prefix  . 'submission_reduction_codes',
                     array('ticket_price' => $reductionCode[0]->ticket_price,
                         'free_parking_ticket' => $reductionCode[0]->free_parking_ticket,
                         'code' => $reductionCode[0]->code,
@@ -354,7 +354,7 @@ function convert_to_csv()
 
         global $wpdb;
 
-        foreach ($wpdb->get_col("DESC " . 'word1_submissions', 0) as $column_name) {
+        foreach ($wpdb->get_col("DESC " . $wpdb->prefix . 'submissions', 0) as $column_name) {
             if (isset($_POST['download_participants']) && in_array($column_name, $downloadParticipantsFields)) {
                 $header[] = $column_name;
             } elseif (isset($_POST['download_invoices_new']) && in_array($column_name, $downloadInvoicesFields)) {
@@ -362,7 +362,7 @@ function convert_to_csv()
             }
         }
 
-        foreach ($wpdb->get_col("DESC " . 'word1_submission_invoices', 0) as $column_name) {
+        foreach ($wpdb->get_col("DESC " . $wpdb->prefix . 'submission_invoices', 0) as $column_name) {
             if ($column_name != 'submission_id') {
                 if (isset($_POST['download_participants']) && in_array($column_name, $downloadParticipantsFields)) {
                     $header[] = $column_name;
@@ -389,7 +389,7 @@ function convert_to_csv()
         header('Content-Disposition: attachment; filename=' . $output_file_name);
         fputcsv($f, $header, ';');
 
-        $submissions = $wpdb->get_results("SELECT submission.*, invoice.* FROM word1_submissions as submission INNER JOIN word1_submission_invoices as invoice ON invoice.submission_id = submission.submission_id WHERE active < 1 OR active is NULL AND submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
+        $submissions = $wpdb->get_results("SELECT submission.*, invoice.* FROM {$wpdb->prefix}submissions  as submission INNER JOIN {$wpdb->prefix}submission_invoices as invoice ON invoice.submission_id = submission.submission_id WHERE active < 1 OR active is NULL AND submission_date >= '" . $fromDate . "' AND submission_date <= '" . $toDate . "'");
 
         /* loop through array  */
         foreach ($submissions as $submission) {
@@ -416,7 +416,7 @@ function convert_to_csv()
             if (isset($_POST['download_participants'])) {
                 $submissionId = $submissionTempArray['submission_id'];
 
-                $submissionsOParticipants = $wpdb->get_results("SELECT * FROM word1_submission_participants where submission_id = " . $submissionId);
+                $submissionsOParticipants = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}submission_participants where submission_id = " . $submissionId);
 
                 foreach ($submissionsOParticipants as $participant) {
                     $participantArray = (array)$participant;
@@ -443,7 +443,7 @@ function convert_to_csv()
                 }
             } elseif (isset($_POST['download_invoices_new'])) {
                 $submissionId = $submissionTempArray['submission_id'];
-                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event, row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax FROM word1_submission_crm_details where submission_id = " . $submissionId);
+                $submissionPaymentDetails = $wpdb->get_results("SELECT event as payment_event, row_description as payment_row_description, price as payment_price,btw_type as payment_btw_type, tax as payment_tax FROM {$wpdb->prefix}submission_crm_details where submission_id = " . $submissionId);
 
                  foreach ($submissionPaymentDetails as $paymentDetail) {
                     $paymentArray = (array)$paymentDetail;

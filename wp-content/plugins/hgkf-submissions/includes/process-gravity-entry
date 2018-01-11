@@ -358,15 +358,13 @@ function processPaymentFields($entry)
     if ($dbReductionCode && $dbReductionCode != '') {
         global $wpdb;
         $sql = "SELECT * FROM " . $wpdb->prefix . "submission_reduction_codes where code = '" . $dbReductionCode . "'";
-
         $result = $wpdb->get_results($sql, 'ARRAY_A');
-
-        // Check for free parking ticket in the reduction code
-        $freeParkingTicket = $result[0]['free_parking_ticket'] == 1 ? true : false;
-        $dbParkingTicketFree = $result[0]['free_parking_ticket'];
 
         if (count($result) > 0) {
             $dbTicketPrice = $result[0]['ticket_price'];
+            // Check for free parking ticket in the reduction code
+            $freeParkingTicket = $result[0]['free_parking_ticket'] == 1 ? true : false;
+            $dbParkingTicketFree = $result[0]['free_parking_ticket'];
         }
     }
 
@@ -506,7 +504,6 @@ function saveSubmission()
 
     global $wpdb;
 
-    debug_to_console('Reduction code: ' . $dbParkingTicketFree);
     $wpdb->insert($wpdb->prefix . 'submissions',
         array(
             'submission_id' => $dbSubmissionId,

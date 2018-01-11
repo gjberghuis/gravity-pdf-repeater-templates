@@ -376,6 +376,7 @@ function convert_to_csv()
             $header[] = "participant_firstname";
             $header[] = "participant_lastname";
             $header[] = "participant_email";
+            $header[] = "participant_phone";
         } elseif (isset($_POST['download_invoices_new'])) {
             $header[] = "payment_event";
             $header[] = "payment_row_description";
@@ -437,6 +438,7 @@ function convert_to_csv()
                     $lineArray[] = $firstnameParticipant;
                     $lineArray[] = $lastnameParticipant;
                     $lineArray[] = $participantArray['email'];
+                    $lineArray[] = $participantArray['phone'];
 
                     /** default php csv handler **/
                     fputcsv($f, $lineArray, ';');

@@ -292,6 +292,10 @@ function processParticipants($entry, $form) {
     if (!empty($entry[13])) {
         $mainParticipant['E-mailadres'] = $entry[13];
     }
+
+    if (!empty($entry[40])) {
+        $mainParticipant['Telefoon'] = $entry[40];
+    }
     $dbParticipants[] = $mainParticipant;
 
     // Search for repeater fields and loop through the repeater field -> 'Meer deelnemers toevoegen'
@@ -628,7 +632,8 @@ function saveSubmission()
             array(
                 'submission_id' => $dbSubmissionId,
                 'name' => $part['Naam'],
-                'email' => $part['E-mailadres']
+                'email' => $part['E-mailadres'],
+                'phone' => $part['Telefoon']
             )
         );
     }

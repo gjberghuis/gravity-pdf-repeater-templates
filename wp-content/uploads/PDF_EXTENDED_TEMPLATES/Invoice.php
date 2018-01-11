@@ -410,11 +410,6 @@ $settings = $wpdb->get_results($query);
                     <div class="general-label"><b>Factuurnummer</b></div>
                     <div class="general-value"><?php echo $invoice[0]->number; ?></div>
                 </li>
-                <!--
-                <li>
-                    <div class="general-label"><b>Debiteurnummer</b></div>
-                    <div class="general-value">453475</div>
-                </li> -->
                 <li>
                     <div class="general-label"><b>Uw referentie</b></div>
                     <div class="general-value"><?php echo $invoice[0]->extra_information; ?></div>
@@ -445,15 +440,14 @@ $settings = $wpdb->get_results($query);
                 <th>Totaalbedrag</th>
             </tr>
             <tr>
-                <td>Deelname Het Grootste Kennisfestival 2018</td>
+                <td><?php echo $settings[0]->payment_detail_description_low_btw ?></td>
                 <td align="right"><?php echo count($participants)?>,00</td>
                 <td align="right">€ <?php echo $payment_details[0]->entry_fee ?></td>
                 <td align="right">21 %</td>
                 <td align="right">€ <?php echo $payment_details[0]->entry_fee_btw ?></td>
             </tr>
             <tr>
-                <td>Lekker eten en drinken
-                </td>
+                <td><?php echo $settings[0]->payment_detail_description_high_btw ?></td>
                 <td align="right"><?php echo count($participants)?>,00</td>
                 <td align="right">€ <?php echo $payment_details[0]->food_fee  ?></td>
                 <td align="right">6 %</td>
@@ -478,11 +472,11 @@ $settings = $wpdb->get_results($query);
                 <td align="right">€ <?php echo $payment_details[0]->total  ?></td>
             </tr>
             <tr>
-                <td>BTW 21%</td>
+                <td>BTW <?php echo $payment_details[0]->btw_high  ?>%</td>
                 <td align="right">€ <?php echo $payment_details[0]->total_high_btw  ?></td>
             </tr>
             <tr>
-                <td>BTW 6%</td>
+                <td>BTW <?php echo $payment_details[0]->btw_low  ?>%</td>
                 <td align="right">€ <?php echo $payment_details[0]->total_low_btw  ?></td>
             </tr>
             <tr>

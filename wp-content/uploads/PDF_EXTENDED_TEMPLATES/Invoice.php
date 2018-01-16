@@ -364,6 +364,9 @@ $value_border_colour = (!empty($settings['zadani_border_colour'])) ? $settings['
 $submission_id = $entry['id'];
 global $wpdb;
 
+$query = "SELECT * FROM " . $wpdb->prefix . "submissions where submission_id = " . $submission_id;
+$submission = $wpdb->get_results($query);
+
 $query = "SELECT * FROM " . $wpdb->prefix . "submission_invoices where submission_id = " . $submission_id;
 $invoice = $wpdb->get_results($query);
 
@@ -456,7 +459,7 @@ $settings = $wpdb->get_results($query);
             [gravityforms action="conditional" merge_tag="{Parkeerticket:22}" condition="is" value="ja"]
             <tr>
                 <td>Parkeerticket</td>
-                <td align="right"><?php echo count($participants)?>,00</td>
+                <td align="right"><?php echo $submission[0]->parking_tickets ?>,00</td>
                 <td align="right">€ <?php echo $payment_details[0]->parking_fee  ?></td>
                 <td align="right">21 %</td>
                 <td align="right">€ <?php echo $payment_details[0]->parking_fee_btw  ?></td>

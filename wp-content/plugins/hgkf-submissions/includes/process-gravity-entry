@@ -226,10 +226,10 @@ function processInvoiceNAWFields($entry)
     $dbInvoiceAdress = $entry['18.1'];
 
     global $dbInvoiceZipcode;
-    $dbInvoiceZipcode = $entry['18.5'];
+    $dbInvoiceZipcode = $entry['18.3'];
 
     global $dbInvoiceCity;
-    $dbInvoiceCity = $entry['18.3'];
+    $dbInvoiceCity = $entry['18.5'];
 
     global $dbInvoiceEmail;
     $dbInvoiceEmail = $entry['19'];
